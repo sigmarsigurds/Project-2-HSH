@@ -10,22 +10,7 @@ services:
       - buyer_db
     volumes:
       - ./src:/app
-
-  test-processor:
-    build: ./TestProcessor
-    depends_on:
-      - buyer
-      - rabbitmq
       
-
-  rabbitmq:
-    image: rabbitmq:3.9.8-management
-    #image: rabbitmq:3.8-management-alpine
-    ports: 
-      - "5672:5672"     # amqp protocol port
-      - "15672:15672"   # http port
-
-
   buyer_db:
     image: postgres
     environment:

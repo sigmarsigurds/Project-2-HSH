@@ -10,9 +10,9 @@ class BuyerRepository:
 
     def save_buyer(self, name: str, ssn: str, email: str, phonenumber: str) -> int:
         buyer = self.__connection.execute(
-            f'''
+            f"""
         INSERT INTO buyer(name, ssn, email, phonenumber) VALUES ('{name}','{ssn}','{email}','{phonenumber}') RETURNING id
-        '''
+        """
         )
 
         self.__connection.commit()
@@ -22,10 +22,10 @@ class BuyerRepository:
 
     def get_buyer(self, id: int) -> str:
         buyer = self.__connection.execute(
-            f'''
+            f"""
                 SELECT * FROM buyer where id = '{id}'
-                '''
+                """
         )
 
         row = buyer[0]
-        return row[1]  # skila nafni
+        return row[1], row[2], row[3], row[4]  # skila nafni

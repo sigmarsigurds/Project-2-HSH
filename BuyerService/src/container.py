@@ -2,7 +2,6 @@ from dependency_injector import containers, providers
 
 # from settings import Settings
 
-from buyer_sender import BuyerSender
 from buyer_repository import BuyerRepository
 from db_connections.db_config import DbConfig
 from db_connections.postgres_db_connection import PostgresDbConnection
@@ -10,7 +9,6 @@ from db_connections.postgres_db_connection import PostgresDbConnection
 
 class Container(containers.DeclarativeContainer):
     # config: settings.Settings = providers.Configuration()
-    buyer_sender_provider = providers.Singleton(BuyerSender)
 
     __db_config = providers.Singleton(
         DbConfig,

@@ -3,7 +3,6 @@ from fastapi import APIRouter, Depends
 
 from buyer_model import BuyerModel
 from container import Container
-from buyer_sender import BuyerSender
 from buyer_repository import BuyerRepository
 
 router = APIRouter()
@@ -24,13 +23,11 @@ async def get_buyer(
 @inject
 async def save_buyer(
     buyer: BuyerModel,
-    buyer_sender: BuyerSender = Depends(Provide[Container.buyer_sender_provider]),
     buyer_repository: BuyerRepository = Depends(
         Provide[Container.buyer_repository_provider]
     ),
 ):
 
-    buyer_sender.send_buyer(buyer)
     return buyer_repository.save_buyer(
         buyer.name, buyer.ssn, buyer.email, buyer.phonenumber
     )
