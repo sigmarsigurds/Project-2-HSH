@@ -17,13 +17,11 @@ services:
       - message-api
       - rabbitmq
       
-
   rabbitmq:
     image: rabbitmq:3.9.8-management
     ports: 
       - "5672:5672"     # amqp protocol port
       - "15672:15672"   # http port
-
 
   message_db:
     image: postgres
