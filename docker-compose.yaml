@@ -1,0 +1,39 @@
+version: "3.8"
+services:
+
+  message-api:
+    build: ./MessageApi
+    container_name: "message_container"
+    ports: 
+      - "8000:8000"
+    depends_on:
+      - message_db
+    volumes:
+      - ./MessageApi:/app
+
+  message-processor:
+    build: ./MessageProcessor
+    depends_on:
+      - message-api
+      - rabbitmq
+      
+
+  rabbitmq:
+    image: rabbitmq:3.9.8-management
+    ports: 
+      - "5672:5672"     # amqp protocol port
+      - "15672:15672"   # http port
+
+
+  message_db:
+    image: postgres
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=Message
+    volumes:
+      - message_db-data:/var/lib/postgresql/data
+      - ./migration_scripts:/docker-entrypoint-initdb.d/
+
+volumes:
+  message_db-data:
