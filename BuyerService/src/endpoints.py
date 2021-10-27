@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends
 from buyer_model import BuyerModel
 from container import Container
 from buyer_sender import BuyerSender
-from src.buyer_repository import BuyerRepository
+from buyer_repository import BuyerRepository
 
 router = APIRouter()
 

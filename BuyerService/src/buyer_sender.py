@@ -10,7 +10,9 @@ class BuyerSender:
         self.channel.exchange_declare(exchange="buyers", exchange_type="fanout")
 
     def send_buyer(self, buyer):
-        self.channel.basic_publish(exchange="buyers", routing_key="", body=buyer.name)
+        self.channel.basic_publish(
+            exchange="buyers", routing_key="", body=buyer.name
+        )  # TODO: breyta því body er bara buyer name
         print(" [x] Sent %r" % buyer.name)
 
     @retry(pika.exceptions.AMQPConnectionError, delay=5, jitter=(1, 3))

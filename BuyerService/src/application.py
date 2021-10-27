@@ -1,4 +1,4 @@
-from settings import Settings
+# from settings import Settings
 import uvicorn
 from fastapi import FastAPI
 import endpoints
@@ -8,10 +8,10 @@ from container import Container
 
 def create_app() -> FastAPI:
 
-    settings = Settings("./.env")
+    # settings = Settings("./.env")
 
-    container = Container()
-    container.config.from_pydantic(settings)
+    # container = Container()
+    # container.config.from_pydantic(settings)
 
     container = Container()
     container.wire(modules=[endpoints])

@@ -3,9 +3,9 @@ from dependency_injector import containers, providers
 # from settings import Settings
 
 from buyer_sender import BuyerSender
-from src.buyer_repository import BuyerRepository
-from src.db_connections.db_config import DbConfig
-from src.db_connections.postgres_db_connection import PostgresDbConnection
+from buyer_repository import BuyerRepository
+from db_connections.db_config import DbConfig
+from db_connections.postgres_db_connection import PostgresDbConnection
 
 
 class Container(containers.DeclarativeContainer):
