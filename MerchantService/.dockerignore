@@ -1,0 +1,4 @@
+.venv
+MigrationScript
+Dockerfile
+docker-compose.yaml
