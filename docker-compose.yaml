@@ -1,39 +1,42 @@
 version: "3.8"
 services:
 
-  message-api:
-    build: ./MessageApi
-    container_name: "message_container"
-    ports: 
-      - "8000:8000"
-    depends_on:
-      - message_db
+  merchant-service-api:
+    container_name: "Merchant-Service-api"
+    build: ./MerchantService
+    environment:
+      - POSTGRES_HOST=merchant-service-db
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DATABASE=merchant_db
+      - ENVIRONMENT=dev
+
+    ports:
+      - "8001:8000"
     volumes:
-      - ./MessageApi:/app
-
-  message-processor:
-    build: ./MessageProcessor
+      - ./MerchantService/src:/app/src
     depends_on:
-      - message-api
-      - rabbitmq
-      
-
-  rabbitmq:
-    image: rabbitmq:3.9.8-management
-    ports: 
-      - "5672:5672"     # amqp protocol port
-      - "15672:15672"   # http port
+      - merchant-service-db
 
 
-  message_db:
+  merchant-service-db:
+    container_name: "Merchant-Service-db"
     image: postgres
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=password
-      - POSTGRES_DB=Message
+      - POSTGRES_DB=merchant_db
+
     volumes:
-      - message_db-data:/var/lib/postgresql/data
-      - ./migration_scripts:/docker-entrypoint-initdb.d/
+      - merchant-service-db-data:/var/lib/postgresql/data
+      - ./MerchantService/MigrationScript:/docker-entrypoint-initdb.d/
 
 volumes:
-  message_db-data:
+  merchant-service-db-data:
+
+
+
+
+
+
+  
