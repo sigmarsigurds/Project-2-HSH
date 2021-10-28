@@ -1,5 +1,5 @@
-from pydantic import BaseModel, Field
 from typing import Optional
+from pydantic import BaseModel, Field
 from APIModels.credit_card_model import CreditCardModel
 
 
@@ -8,4 +8,4 @@ class OrderRequestModel(BaseModel):
     merchant_id: int = Field(..., alias="merchantId")
     buyer_id: int = Field(..., alias="buyerId")
     credit_card: CreditCardModel = Field(..., alias="creditCard")
-    discount: float = Field(..., alias="discount")
+    discount: Optional[float] = Field(..., alias="discount")

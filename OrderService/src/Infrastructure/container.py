@@ -1,4 +1,8 @@
 from dependency_injector import containers, providers
+from Validations.MerchantAllowsDiscountValidation import (
+    MerchantAllowsDiscountValidation,
+)
+from Validations.BuyerExistsValidation import BuyerExistsValidation
 from Validations.MerchantExistsValidation import MerchantExistsValidation
 from Validations.OrderValidator import OrderValidator
 
@@ -32,9 +36,16 @@ class Container(containers.DeclarativeContainer):
         rabbitmq_server=config.rabbitmq_server,
     )
 
-    # merchant_exists_validation_factory_provider = providers.Factory(
-    #     MerchantExistsValidation,
-    #     request_url="http://merchant-service-api:8001/merchants/",
-    # )
+    merchant_exists_validation_provider = providers.Singleton(
+        MerchantExistsValidation, "http://merchant-service-api:8001/merchants/"
+    )
+
+    merchant_allows_discount_validation_provider = providers.Singleton(
+        MerchantAllowsDiscountValidation, "http://merchant-service-api:8001/merchants/"
+    )
+
+    buyer_exists_validation_provider = providers.Singleton(
+        BuyerExistsValidation, "http://buyer_container:8002/buyers/"
+    )
 
     order_validator_provider = providers.Singleton(OrderValidator)

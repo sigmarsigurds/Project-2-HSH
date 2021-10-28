@@ -5,6 +5,10 @@ from APIModels.order_request_model import OrderRequestModel
 from APIModels.order_response_model import OrderResponseModel
 from Infrastructure.container import Container
 from APIModels.order_database_model import OrderDatabaseModel
+from Validations.MerchantAllowsDiscountValidation import (
+    MerchantAllowsDiscountValidation,
+)
+from Validations.BuyerExistsValidation import BuyerExistsValidation
 from Validations.MerchantExistsValidation import MerchantExistsValidation
 from Validations.OrderValidator import OrderValidator
 from Repositories.order_repository import OrderRepository
@@ -30,6 +34,7 @@ async def get_order(
     print("supsup")
     return {
         "data": OrderResponseModel(
+            orderId=order.order_id,
             productId=order.product_id,
             merchantId=order.merchant_id,
             buyerId=order.buyer_id,
@@ -50,58 +55,59 @@ async def save_order(
     order_validator: OrderValidator = Depends(
         Provide[Container.order_validator_provider]
     ),
+    merchant_exists_validation: MerchantExistsValidation = Depends(
+        Provide[Container.merchant_exists_validation_provider]
+    ),
+    merchant_allows_discount_validation: MerchantAllowsDiscountValidation = Depends(
+        Provide[Container.merchant_allows_discount_validation_provider]
+    ),
+    buyer_exists_validation: BuyerExistsValidation = Depends(
+        Provide[Container.buyer_exists_validation_provider]
+    ),
 ):
+    """
+    * DONE
+    • OrderService should return 400 HTTP Status Code with the error message "Merchant does not exist" if there is no merchant with the specific merchantId.
+    • OrderService should return 400 HTTP Status Code with the error message "Buyer does not exist" if there is not buyer with the specific buyerId
+    • OrderService should return 400 HTTP Status Code with the error message "Merchant does not allow discount" if merchant with merchantId does not allow discounts and the specified discount is something other then null or 0.
+    * NOT READY
+    • OrderService should return 400 HTTP Status Code with the error message "Product does not exist" if there is no product with the specific productId
+    • OrderService should return 400 HTTP Status Code with the error message "Product is sold out" if a product with the specific productId is sold out.
+    • OrderService should return 400 HTTP Status Code with the error message "Product does not belong to merchant" if product with productId does not belong to merchant with merchantId.
+    • If all the validations are successful then the OrderSErvie should reserve the product, store it in the database, send an event that the order has been created and return 201 HTTP Status Code með order id-i sem response message.
+    """
+
+    # Empty any previous validations
     order_validator.clear_validations()
 
-    order_validator.add_validation(
-        MerchantExistsValidation(merchant_id=order.merchant_id)
-    )
+    # Check if merchant exists
+    merchant_exists_validation.set_merchant_id(order.merchant_id)
+    order_validator.add_validation(merchant_exists_validation)
+
+    # Check if buyer exists
+    buyer_exists_validation.set_buyer_id(order.buyer_id)
+    order_validator.add_validation(buyer_exists_validation)
+
+    # Check if discount is valid and allowed
+    merchant_allows_discount_validation.set_merchant_id(order.merchant_id)
+    merchant_allows_discount_validation.set_order_discount(order.discount)
+    order_validator.add_validation(merchant_allows_discount_validation)
+
+    # TODO: Look into background_tasks for something like this (https://youtu.be/ESVwKQLldjg?t=1065)
+    # Execute all checks above and raise errors if anything is invalid
     valid = order_validator.validate()
 
     if valid:
-        return {"data": {"id": -1, "valid": True}}
 
-    """
-    * READY
-    • OrderService should return 400 HTTP Status Code with the error message "Merchant does not exist" if there is no merchant with the specific merchantId.
-    • OrderService should return 400 HTTP Status Code with the error message "Buyer does not exist" if there is not buyer with the specific buyerId
-    * NOT READY
-    • OrderService should return 400 HTTP Status Code with the error message "Product does not exist" if there is no product with the specific productId
+        order: OrderDatabaseModel = order_repository.save_order(order)
 
-    • OrderService should return 400 HTTP Status Code with the error message "Product is sold out" if a product with the specific productId is sold out.
-    • OrderService should return 400 HTTP Status Code with the error message "Product does not belong to merchant" if product with productId does not belong to merchant with merchantId.
-    • OrderService should return 400 HTTP Status Code with the error message "Merchant does not allow discount" if merchant with merchantId does not allow discounts and the specified discount is something other then null or 0.
-    • If all the validations are successful then the OrderSErvie should reserve the product, store it in the database, send an event that the order has been created and return 201 HTTP Status Code með order id-i sem response message.
-    """
-    # validate_merchant_exists()
-    # validate_buyer_exists()
-    # validate_product_exists()
-    # validate_product_in_stock()
-    # validate_product_merchant_relation()
-    # validate_merchant_discount()
-
-    # saved_message_id = message_repository.save_message(message)
-    # message_sender.send_message(message)
-    # TODO: FIX THIS SHIT
-    # try:
-    #     if is_order_valid(order):
-    #         return {"data": {"id": -1, "valid": True}}
-    # except MerchantDoesNotExistException:
-    #     raise HTTPException(status_code=400, detail="Merchant does not exist")
-
-    # print("we finna do dis")
-    # print(order.merchant_id)
-    # order_validator.add_validation(
-    #     merchant_exists_validation_factory(merchant_id=order.merchant_id)
-    # )
-
-    # valid = order_validator.validate()
-
-    # order_validator.clear_validations()
-
-    # if valid:
-    #     return {"data": {"id": -1, "valid": True}}
-
-    # if is_order_valid(order):
-    #    return {"data": {"id": -1, "valid": True}}
-    # return {"data": {"id": -1, "valid": False}}
+        return {
+            "data": OrderResponseModel(
+                orderId=order.order_id,
+                productId=order.product_id,
+                merchantId=order.merchant_id,
+                buyerId=order.buyer_id,
+                cardNumber=order.credit_card.card_number,
+                totalPrice=-1,
+            )
+        }

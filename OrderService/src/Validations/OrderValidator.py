@@ -8,8 +8,7 @@ class OrderValidator(Validation):
 
     def validate(self) -> bool:
         for validation in self.__validations:
-            if not validation.validate():
-                return False
+            validation.validate()
         return True
 
     def add_validation(self, validation: Validation) -> None:
