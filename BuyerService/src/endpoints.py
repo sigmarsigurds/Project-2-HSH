@@ -1,5 +1,5 @@
 from dependency_injector.wiring import inject, Provide
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 
 from buyer_model import BuyerModel
 from container import Container
@@ -16,7 +16,10 @@ async def get_buyer(
         Provide[Container.buyer_repository_provider]
     ),
 ):
-    return buyer_repository.get_buyer(id)
+    buyer: BuyerModel = buyer_repository.get_buyer(id)
+    if buyer is None:
+        raise HTTPException(status_code=404, detail="Buyer does not exist")
+    return buyer
 
 
 @router.post("/buyers", status_code=201)  # save message and send message event
@@ -29,7 +32,7 @@ async def save_buyer(
 ):
 
     return buyer_repository.save_buyer(
-        buyer.name, buyer.ssn, buyer.email, buyer.phonenumber
+        buyer.name, buyer.ssn, buyer.email, buyer.phoneNumber
     )
 
     # save message and send message event
