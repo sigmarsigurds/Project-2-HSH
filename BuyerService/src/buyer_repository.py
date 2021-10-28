@@ -8,10 +8,10 @@ class BuyerRepository:
     def __init__(self, connection: DbConnection):
         self.__connection = connection
 
-    def save_buyer(self, name: str, ssn: str, email: str, phonenumber: str) -> int:
+    def save_buyer(self, name: str, ssn: str, email: str, phone_number: str) -> int:
         buyer = self.__connection.execute(
             f"""
-        INSERT INTO buyer(name, ssn, email, phonenumber) VALUES ('{name}','{ssn}','{email}','{phonenumber}') RETURNING id
+        INSERT INTO buyer(name, ssn, email, phoneNumber) VALUES ('{name}','{ssn}','{email}','{phone_number}') RETURNING id
         """
         )
 
@@ -21,11 +21,20 @@ class BuyerRepository:
         return row[0]  # skila id
 
     def get_buyer(self, id: int) -> str:
-        buyer = self.__connection.execute(
+        rows = self.__connection.execute(
             f"""
                 SELECT * FROM buyer where id = '{id}'
                 """
         )
+        if len(rows) > 0:
 
-        row = buyer[0]
-        return row[1], row[2], row[3], row[4]  # skila nafni
+            row = rows[0]
+            return {
+                "buyer": BuyerModel(
+                    buyerId=id,
+                    name=row[1],
+                    ssn=row[2],
+                    email=row[3],
+                    phoneNumber=row[4],
+                )  # skila nafni
+            }
