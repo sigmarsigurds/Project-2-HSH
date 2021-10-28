@@ -24,6 +24,7 @@ services:
       - ./OrderService/MigrationScript:/docker-entrypoint-initdb.d/
   # / Order Service
 
+  # Merchant Service
   merchant-service-api:
     container_name: "Merchant-Service-api"
     build: ./MerchantService
@@ -35,7 +36,7 @@ services:
       - ENVIRONMENT=dev
 
     ports:
-      - "8001:8000"
+      - "8001:8001"
     volumes:
       - ./MerchantService/src:/app/src
     depends_on:
@@ -53,6 +54,32 @@ services:
       - merchant-service-db-data:/var/lib/postgresql/data
       - ./MerchantService/MigrationScript:/docker-entrypoint-initdb.d/
 
+  # / Merchant Service
+
+  # Buyer Service
+
+  buyer:
+    build: ./BuyerService/src
+    container_name: "buyer_container"
+    ports:
+      - "8002:8002"
+    depends_on:
+      - buyer_db
+    volumes:
+      - ./src:/app
+
+  buyer_db:
+    image: postgres
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=Buyer
+    volumes:
+      - buyer_db-data:/var/lib/postgresql/data
+      - ./BuyerService/migration_scripts:/docker-entrypoint-initdb.d/
+
+  # / Buyer Service
+
   rabbitmq:
     image: rabbitmq:3.9.8-management
     container_name: "rabbitmq"
@@ -63,3 +90,4 @@ services:
 volumes:
   order-database-data:
   merchant-service-db-data:
+  buyer_db-data:
