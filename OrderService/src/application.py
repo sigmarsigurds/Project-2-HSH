@@ -11,6 +11,11 @@ def create_app() -> FastAPI:
     container = Container()
     container.config.from_pydantic(settings)
 
+    # order_validator = container.order_validator_provider()
+    # merchant_exists = container.merchant_exists_provider()
+
+    # order_validator.add_validation(merchant_exists)
+
     container.wire(modules=[endpoints])
 
     app = FastAPI()

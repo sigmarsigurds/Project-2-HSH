@@ -1,4 +1,6 @@
 from dependency_injector import containers, providers
+from Validations.MerchantExistsValidation import MerchantExistsValidation
+from Validations.OrderValidator import OrderValidator
 
 from Repositories.order_repository import OrderRepository
 from Infrastructure.settings import Settings
@@ -29,3 +31,10 @@ class Container(containers.DeclarativeContainer):
         queue_name=config.queue_name,
         rabbitmq_server=config.rabbitmq_server,
     )
+
+    # merchant_exists_validation_factory_provider = providers.Factory(
+    #     MerchantExistsValidation,
+    #     request_url="http://merchant-service-api:8001/merchants/",
+    # )
+
+    order_validator_provider = providers.Singleton(OrderValidator)

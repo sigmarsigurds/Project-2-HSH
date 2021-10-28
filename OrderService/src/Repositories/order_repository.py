@@ -1,5 +1,6 @@
-from APIModels.order_model import OrderModel
+from APIModels.order_request_model import OrderRequestModel
 from APIModels.credit_card_model import CreditCardModel
+from APIModels.order_database_model import OrderDatabaseModel
 from Repositories.db_connection import DbConnection
 
 
@@ -7,7 +8,7 @@ class OrderRepository:
     def __init__(self, connection: DbConnection) -> None:
         self.__connection = connection
 
-    def save_order(self, order: OrderModel) -> int:
+    def save_order(self, order: OrderRequestModel) -> int:
         # TODO: save message to persistent storage and return id
 
         # res_id = self.__connection.execute(
@@ -21,7 +22,7 @@ class OrderRepository:
         # return res_id[0][0]
 
     # TODO: Ask the typing pervert how to do either OrderModel OR None
-    def get_order(self, id: int) -> OrderModel:
+    def get_order(self, id: int) -> OrderDatabaseModel:
         # TODO: return message with id from storage
         rows = self.__connection.execute(
             f"""
@@ -50,7 +51,7 @@ class OrderRepository:
             )
             print("beii")
 
-            return OrderModel(
+            return OrderDatabaseModel(
                 order_id=row[0],
                 productId=row[1],
                 merchantId=row[2],

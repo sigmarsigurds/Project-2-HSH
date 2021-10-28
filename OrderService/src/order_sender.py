@@ -1,6 +1,7 @@
 import pika
 from retry import retry
-from APIModels.order_model import OrderModel
+
+from APIModels.order_database_model import OrderDatabaseModel
 
 
 class OrderSender:
@@ -12,7 +13,7 @@ class OrderSender:
         self.channel = self.connection.channel()
         self.channel.queue_declare(queue=self.queue_name)
 
-    def send_order(self, order: OrderModel):
+    def send_order(self, order: OrderDatabaseModel):
         # TODO: send message via rabbitmq
 
         self.channel.basic_publish(exchange="", routing_key=self.queue_name, body=order)
