@@ -5,6 +5,7 @@ from APIModels.order_request_model import OrderRequestModel
 from APIModels.order_response_model import OrderResponseModel
 from Infrastructure.container import Container
 from APIModels.order_database_model import OrderDatabaseModel
+from Tools.FormatCreditCardNumber import FormatCreditCardNumber
 from Validations.MerchantAllowsDiscountValidation import (
     MerchantAllowsDiscountValidation,
 )
@@ -13,7 +14,6 @@ from Validations.MerchantExistsValidation import MerchantExistsValidation
 from Validations.OrderValidator import OrderValidator
 from Repositories.order_repository import OrderRepository
 from order_sender import OrderSender
-from Validations.is_order_valid import is_order_valid
 
 router = APIRouter()
 
@@ -107,7 +107,7 @@ async def save_order(
                 productId=order.product_id,
                 merchantId=order.merchant_id,
                 buyerId=order.buyer_id,
-                cardNumber=order.credit_card.card_number,
+                cardNumber=FormatCreditCardNumber.format(order.credit_card.card_number),
                 totalPrice=-1,
             )
         }
