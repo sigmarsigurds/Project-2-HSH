@@ -1,10 +1,13 @@
 from fastapi import HTTPException
+from APIModels.service_model import ServiceModel
 from Validations.Validation import Validation
 
 
 class MerchantExistsValidation(Validation):
-    def __init__(self, request_url) -> None:
-        self.__request_url: str = request_url
+    def __init__(self, service: ServiceModel) -> None:
+        self.__request_url: str = (
+            f"http://{service.host}:{service.port}/{service.endpoint}/"
+        )
         self.__merchant_id: int = None
         self.__fail_message: str = "Merchant does not exist"
 

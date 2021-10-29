@@ -1,12 +1,15 @@
 from typing import Optional
 from fastapi import HTTPException
 import requests
+from APIModels.service_model import ServiceModel
 from Validations.Validation import Validation
 
 
 class MerchantAllowsDiscountValidation(Validation):
-    def __init__(self, request_url) -> None:
-        self.__request_url: str = request_url
+    def __init__(self, service: ServiceModel) -> None:
+        self.__request_url: str = (
+            f"http://{service.host}:{service.port}/{service.endpoint}/"
+        )
         self.__merchant_id: int = None
         self.__fail_message: str = "Merchant does not allow discount"
         self.__order_discount: Optional[float] = None
@@ -52,5 +55,5 @@ class MerchantAllowsDiscountValidation(Validation):
     def set_order_discount(self, discount: float) -> None:
         self.__order_discount = discount
 
-    def get_order_discount(self):
+    def get_order_discount(self) -> Optional[float]:
         return self.__order_discount

@@ -65,6 +65,12 @@ async def save_order(
         Provide[Container.buyer_exists_validation_provider]
     ),
 ):
+    # * Done (except for some validations)
+    """
+    When OrderService gets the request to create an order,
+    it communicates with MerchantService and BuyerService with Request/Response based communication
+    (for example REST) and checks if there is a buyer and merchanr for the correspondent buyer_id og merchant_id.
+    """
     """
     * DONE
     • OrderService should return 400 HTTP Status Code with the error message "Merchant does not exist" if there is no merchant with the specific merchantId.
@@ -97,17 +103,33 @@ async def save_order(
     # Execute all checks above and raise errors if anything is invalid
     valid = order_validator.validate()
 
-    if valid:
+    if not valid:
+        raise HTTPException(status_code=418, detail="Something is not right...")
 
-        order: OrderDatabaseModel = order_repository.save_order(order)
+    """
+    * Not done
+    Then OrderService communicates next with the InventoryService with request/response based communication 
+    and reserves a product with product_id. 
+    """
 
-        return {
-            "data": OrderResponseModel(
-                orderId=order.order_id,
-                productId=order.product_id,
-                merchantId=order.merchant_id,
-                buyerId=order.buyer_id,
-                cardNumber=FormatCreditCardNumber.format(order.credit_card.card_number),
-                totalPrice=-1,
-            )
-        }
+    product = {"foo": "bar"}
+
+    """
+    If OrderServicec was successful in reserving the product (the product wasn’t sold out / the product exists) 
+    then OrderServices stores the order in it’s database and sends out an event that the order has been created.
+    """
+
+    order: OrderDatabaseModel = order_repository.save_order(order)
+
+    order_sender.send_order_email(order)
+
+    return {
+        "data": OrderResponseModel(
+            orderId=order.order_id,
+            productId=order.product_id,
+            merchantId=order.merchant_id,
+            buyerId=order.buyer_id,
+            cardNumber=FormatCreditCardNumber.format(order.credit_card.card_number),
+            totalPrice=-1,
+        )
+    }

@@ -11,6 +11,9 @@ services:
       - rabbitmq
     volumes:
       - ./OrderService/src:/app
+    networks:
+      - order-network
+      - rabbitmq-network
 
   order-database-host:
     image: postgres
@@ -22,6 +25,9 @@ services:
     volumes:
       - order-database-data:/var/lib/postgresql/data
       - ./OrderService/MigrationScript:/docker-entrypoint-initdb.d/
+    networks:
+      - order-network
+      - rabbitmq-network
   # / Order Service
 
   # Merchant Service
@@ -41,6 +47,9 @@ services:
       - ./MerchantService/src:/app/src
     depends_on:
       - merchant-service-db
+    networks:
+      - merchant-network
+      - rabbitmq-network
 
   merchant-service-db:
     container_name: "Merchant-Service-db"
@@ -53,6 +62,9 @@ services:
     volumes:
       - merchant-service-db-data:/var/lib/postgresql/data
       - ./MerchantService/MigrationScript:/docker-entrypoint-initdb.d/
+
+    networks:
+      - merchant-network
 
   # / Merchant Service
 
@@ -67,6 +79,9 @@ services:
       - buyer_db
     volumes:
       - ./BuyerService/src:/app
+    networks:
+      - buyer-network
+      - rabbitmq-network
 
   buyer_db:
     image: postgres
@@ -77,8 +92,21 @@ services:
     volumes:
       - buyer_db-data:/var/lib/postgresql/data
       - ./BuyerService/migration_scripts:/docker-entrypoint-initdb.d/
+    networks:
+      - buyer-network
 
   # / Buyer Service
+
+  # Email Service
+  email-service:
+    build: ./EmailService
+    depends_on:
+      - rabbitmq
+    volumes:
+      - ./EmailService/src:/app
+    networks:
+      - rabbitmq-network
+  # / Email Service
 
   rabbitmq:
     image: rabbitmq:3.9.8-management
@@ -86,8 +114,23 @@ services:
     hostname: rabbitmq
     ports:
       - "8080:15672"
+    networks:
+      - rabbitmq-network
 
 volumes:
   order-database-data:
   merchant-service-db-data:
   buyer_db-data:
+
+networks:
+  order-network:
+    driver: bridge
+
+  buyer-network:
+    driver: bridge
+
+  merchant-network:
+    driver: bridge
+
+  rabbitmq-network:
+    driver: bridge
