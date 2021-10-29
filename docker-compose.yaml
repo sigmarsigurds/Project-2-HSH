@@ -1,6 +1,30 @@
 version: "3.8"
 services:
+  # Order Service
+  order-service:
+    build: ./OrderService
+    container_name: "order-service"
+    ports:
+      - "8000:8000"
+    depends_on:
+      - order-database-host
+      - rabbitmq
+    volumes:
+      - ./OrderService/src:/app
 
+  order-database-host:
+    image: postgres
+    container_name: "order-database-host"
+    environment:
+      - POSTGRES_USER=${ORDER_POSTGRES_USER}
+      - POSTGRES_PASSWORD=${ORDER_POSTGRES_PASSWORD}
+      - POSTGRES_DB=${ORDER_POSTGRES_DB}
+    volumes:
+      - order-database-data:/var/lib/postgresql/data
+      - ./OrderService/MigrationScript:/docker-entrypoint-initdb.d/
+  # / Order Service
+
+  # Merchant Service
   merchant-service-api:
     container_name: "Merchant-Service-api"
     build: ./MerchantService
@@ -12,12 +36,11 @@ services:
       - ENVIRONMENT=dev
 
     ports:
-      - "8001:8000"
+      - "8001:8001"
     volumes:
       - ./MerchantService/src:/app/src
     depends_on:
       - merchant-service-db
-
 
   merchant-service-db:
     container_name: "Merchant-Service-db"
@@ -31,12 +54,40 @@ services:
       - merchant-service-db-data:/var/lib/postgresql/data
       - ./MerchantService/MigrationScript:/docker-entrypoint-initdb.d/
 
+  # / Merchant Service
+
+  # Buyer Service
+
+  buyer:
+    build: ./BuyerService/src
+    container_name: "buyer_container"
+    ports:
+      - "8002:8002"
+    depends_on:
+      - buyer_db
+    volumes:
+      - ./BuyerService/src:/app
+
+  buyer_db:
+    image: postgres
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=Buyer
+    volumes:
+      - buyer_db-data:/var/lib/postgresql/data
+      - ./BuyerService/migration_scripts:/docker-entrypoint-initdb.d/
+
+  # / Buyer Service
+
+  rabbitmq:
+    image: rabbitmq:3.9.8-management
+    container_name: "rabbitmq"
+    hostname: rabbitmq
+    ports:
+      - "8080:15672"
+
 volumes:
+  order-database-data:
   merchant-service-db-data:
-
-
-
-
-
-
-  
+  buyer_db-data:

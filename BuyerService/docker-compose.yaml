@@ -1,16 +1,15 @@
 version: "3.8"
 services:
-
   buyer:
     build: ./src
     container_name: "buyer_container"
-    ports: 
-      - "8000:8000"
+    ports:
+      - "8002:8002"
     depends_on:
       - buyer_db
     volumes:
       - ./src:/app
-      
+
   buyer_db:
     image: postgres
     environment:
