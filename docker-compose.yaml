@@ -29,6 +29,8 @@ services:
     container_name: "Merchant-Service-api"
     build: ./MerchantService
     environment:
+      - HOST=0.0.0.0
+      - PORT=8001
       - POSTGRES_HOST=merchant-service-db
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=password
