@@ -22,8 +22,16 @@ class Settings(BaseSettings):
 
     environment: Environment
 
-    queue_name: str
-    rabbitmq_server: str
+    # queue_name: str
+    rabbitmq_server_host: str
+
+    merchant_service_host: str
+    merchant_service_endpoint: str
+    merchant_service_port: str
+
+    buyer_service_host: str
+    buyer_service_endpoint: str
+    buyer_service_port: str
 
     class Config:
         env_file = ".env"

@@ -11,6 +11,9 @@ services:
       - rabbitmq
     volumes:
       - ./OrderService/src:/app
+    networks:
+      - order-network
+      - rabbitmq-network
 
   order-database-host:
     image: postgres
@@ -18,10 +21,13 @@ services:
     environment:
       - POSTGRES_USER=${ORDER_POSTGRES_USER}
       - POSTGRES_PASSWORD=${ORDER_POSTGRES_PASSWORD}
-      - POSTGRES_DB=${ORDER_POSTGRES_DB}
+      - POSTGRES_DB=${ORDER_POSTGRES_DATABASE}
     volumes:
       - order-database-data:/var/lib/postgresql/data
       - ./OrderService/MigrationScript:/docker-entrypoint-initdb.d/
+    networks:
+      - order-network
+      - rabbitmq-network
   # / Order Service
 
   # Merchant Service
@@ -29,6 +35,8 @@ services:
     container_name: "Merchant-Service-api"
     build: ./MerchantService
     environment:
+      - HOST=0.0.0.0
+      - PORT=8001
       - POSTGRES_HOST=merchant-service-db
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=password
@@ -41,9 +49,12 @@ services:
       - ./MerchantService/src:/app/src
     depends_on:
       - merchant-service-db
+    networks:
+      - merchant-network
+      - rabbitmq-network
 
   merchant-service-db:
-    container_name: "Merchant-Service-db"
+    container_name: "Merchant-Service-database"
     image: postgres
     environment:
       - POSTGRES_USER=postgres
@@ -51,8 +62,11 @@ services:
       - POSTGRES_DB=merchant_db
 
     volumes:
-      - merchant-service-db-data:/var/lib/postgresql/data
+      - merchant-service-database-data:/var/lib/postgresql/data
       - ./MerchantService/MigrationScript:/docker-entrypoint-initdb.d/
+
+    networks:
+      - merchant-network
 
   # / Merchant Service
 
@@ -66,7 +80,10 @@ services:
     depends_on:
       - buyer_db
     volumes:
-      - ./src:/app
+      - ./BuyerService/src:/app
+    networks:
+      - buyer-network
+      - rabbitmq-network
 
   buyer_db:
     image: postgres
@@ -77,8 +94,55 @@ services:
     volumes:
       - buyer_db-data:/var/lib/postgresql/data
       - ./BuyerService/migration_scripts:/docker-entrypoint-initdb.d/
+    networks:
+      - buyer-network
 
   # / Buyer Service
+
+  # Email Service
+  email-service:
+    build: ./EmailService
+    depends_on:
+      - rabbitmq
+    volumes:
+      - ./EmailService/src:/app
+    networks:
+      - rabbitmq-network
+  # / Email Service
+  # Inventory Service
+
+  inventory-service-api:
+    container_name: "Inventory-Service-api"
+    build: ./InventoryService
+    environment:
+      - HOST=0.0.0.0
+      - PORT=8003
+      - POSTGRES_HOST=inventory-service-database
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DATABASE=inventory_db
+      - ENVIRONMENT=dev
+
+    ports:
+      - "8003:8003"
+    volumes:
+      - ./InventoryService/src:/app/src
+    depends_on:
+      - inventory-service-database
+
+  inventory-service-database:
+    container_name: "Inventory-Service-database"
+    image: postgres
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=inventory_db
+
+    volumes:
+      - inventory-service-database-data:/var/lib/postgresql/data
+      - ./InventoryService/MigrationScript:/docker-entrypoint-initdb.d/
+
+  # / Inventory Service
 
   rabbitmq:
     image: rabbitmq:3.9.8-management
@@ -86,8 +150,24 @@ services:
     hostname: rabbitmq
     ports:
       - "8080:15672"
+    networks:
+      - rabbitmq-network
 
 volumes:
   order-database-data:
-  merchant-service-db-data:
+  merchant-service-database-data:
+  inventory-service-database-data:
   buyer_db-data:
+
+networks:
+  order-network:
+    driver: bridge
+
+  buyer-network:
+    driver: bridge
+
+  merchant-network:
+    driver: bridge
+
+  rabbitmq-network:
+    driver: bridge

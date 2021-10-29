@@ -15,7 +15,3 @@ CREATE TABLE IF NOT EXISTS "Order" (
     FOREIGN KEY (card_id) REFERENCES "CreditCard" (card_id),
     discount FLOAT
 );
-
-
-INSERT INTO "CreditCard" VALUES (DEFAULT, '12341234123412341234', 10, 2023, 123);
-INSERT INTO "Order" VALUES (DEFAULT, 1, 1, 1, 1, 0.5);

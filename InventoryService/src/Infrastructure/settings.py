@@ -25,13 +25,13 @@ class Settings(BaseSettings):
     environment: Environment
 
     class Config:
-        # env_prefix = 'MERCHANT_SERVICE_'  # defaults to no prefix, i.e. ""
+        # env_prefix = 'INVENTORY_SERVICE_'  # defaults to no prefix, i.e. ""
         fields = {
             'host': {
                 'env': 'HOST'
             },
             'port': {
-                'PORT': 'PORT'
+                'env': 'PORT'
             },
             'postgres_host': {
                 'env': 'POSTGRES_HOST',
@@ -49,3 +49,4 @@ class Settings(BaseSettings):
                 'env': 'ENVIRONMENT'
             }
         }
+

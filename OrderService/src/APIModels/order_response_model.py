@@ -1,7 +1,8 @@
 from pydantic import BaseModel, Field
 
 
-class OrderPresentationModel(BaseModel):
+class OrderResponseModel(BaseModel):
+    order_id: int = Field(..., alias="orderId")
     product_id: int = Field(..., alias="productId")
     merchant_id: int = Field(..., alias="merchantId")
     buyer_id: int = Field(..., alias="buyerId")
