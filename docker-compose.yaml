@@ -43,7 +43,7 @@ services:
       - merchant-service-db
 
   merchant-service-db:
-    container_name: "Merchant-Service-db"
+    container_name: "Merchant-Service-database"
     image: postgres
     environment:
       - POSTGRES_USER=postgres
@@ -51,7 +51,7 @@ services:
       - POSTGRES_DB=merchant_db
 
     volumes:
-      - merchant-service-db-data:/var/lib/postgresql/data
+      - merchant-service-database-data:/var/lib/postgresql/data
       - ./MerchantService/MigrationScript:/docker-entrypoint-initdb.d/
 
   # / Merchant Service
@@ -80,6 +80,39 @@ services:
 
   # / Buyer Service
 
+  # Inventory Service
+
+  inventory-service-api:
+    container_name: "Inventory-Service-api"
+    build: ./InventoryService
+    environment:
+      - POSTGRES_HOST=inventory-service-db
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DATABASE=inventory_db
+      - ENVIRONMENT=dev
+
+    ports:
+      - "8003:8003"
+    volumes:
+      - ./InventoryService/src:/app/src
+    depends_on:
+      - inventory-service-db
+
+  inventory-service-db:
+    container_name: "Inventory-Service-database"
+    image: postgres
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=inventory_db
+
+    volumes:
+      - inventory-service-database-data:/var/lib/postgresql/data
+      - ./InventoryService/MigrationScript:/docker-entrypoint-initdb.d/
+
+  # / Inventory Service
+
   rabbitmq:
     image: rabbitmq:3.9.8-management
     container_name: "rabbitmq"
@@ -89,5 +122,6 @@ services:
 
 volumes:
   order-database-data:
-  merchant-service-db-data:
+  merchant-service-database-data:
+  inventory-service-database-data:
   buyer_db-data:
