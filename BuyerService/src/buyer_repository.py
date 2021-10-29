@@ -27,7 +27,6 @@ class BuyerRepository:
                 """
         )
         if len(rows) > 0:
-
             row = rows[0]
             return {
                 "buyer": BuyerModel(
