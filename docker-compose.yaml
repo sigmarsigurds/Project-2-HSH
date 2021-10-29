@@ -86,7 +86,9 @@ services:
     container_name: "Inventory-Service-api"
     build: ./InventoryService
     environment:
-      - POSTGRES_HOST=inventory-service-db
+      - HOST=0.0.0.0
+      - PORT=8003
+      - POSTGRES_HOST=inventory-service-database
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=password
       - POSTGRES_DATABASE=inventory_db
@@ -97,9 +99,9 @@ services:
     volumes:
       - ./InventoryService/src:/app/src
     depends_on:
-      - inventory-service-db
+      - inventory-service-database
 
-  inventory-service-db:
+  inventory-service-database:
     container_name: "Inventory-Service-database"
     image: postgres
     environment:

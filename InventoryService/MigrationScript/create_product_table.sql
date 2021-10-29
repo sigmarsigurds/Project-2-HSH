@@ -4,5 +4,5 @@ CREATE TABLE IF NOT EXISTS Product(
     name VARCHAR(255) NOT NULL,
     price NUMERIC,
     quantity INTEGER,
-    reserved INTEGER DEFAULT VALUE 0
+    reserved INTEGER DEFAULT 0
 )

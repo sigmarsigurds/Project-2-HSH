@@ -14,9 +14,9 @@ class InventoryRepository:
 
         return ProductModel(
             id=product_id,
-            merchant_id=merchant_id,
-            product_name=product_name,
-            price=price,
+            merchantId=merchant_id,    # This needs to be camel case, beaches this model is also use for receiving
+            productName=product_name,  # request from clients, and whe are using alias to allow the JSON to be camel
+            price=price,               # case
             quantity=quantity,
             reserved=reserved
         )

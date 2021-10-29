@@ -9,4 +9,4 @@ class ProductModel(BaseModel):
     name: str = Field(..., alias='productName')
     price: Decimal
     quantity: int
-    reserved: int
+    reserved: int = 0  # * When a post request is done, number of reserved units are not provide

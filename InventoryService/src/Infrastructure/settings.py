@@ -14,6 +14,9 @@ class Environment(ContainerSettingEnum):
 
 
 class Settings(BaseSettings):
+    host: str
+    port: int
+
     postgres_host: str
     postgres_database: str
     postgres_user: str
@@ -22,8 +25,14 @@ class Settings(BaseSettings):
     environment: Environment
 
     class Config:
-        # env_prefix = 'MERCHANT_SERVICE_'  # defaults to no prefix, i.e. ""
+        # env_prefix = 'INVENTORY_SERVICE_'  # defaults to no prefix, i.e. ""
         fields = {
+            'host': {
+                'env': 'HOST'
+            },
+            'port': {
+                'env': 'PORT'
+            },
             'postgres_host': {
                 'env': 'POSTGRES_HOST',
             },
