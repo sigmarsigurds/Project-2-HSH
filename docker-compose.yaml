@@ -8,7 +8,11 @@ services:
       - "8000:8000"
     depends_on:
       - order-database-host
+      - merchant-service-api
+      - buyer
+      - inventory-service-api
       - rabbitmq
+      - email-service
     volumes:
       - ./OrderService/src:/app
     networks:

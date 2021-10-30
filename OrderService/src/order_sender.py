@@ -6,19 +6,22 @@ from APIModels.order_database_model import OrderDatabaseModel
 
 class OrderSender:
     def __init__(self, rabbitmq_server_host: str) -> None:
-        # TODO: initate connection
-        # self.queue_name = queue_name
+
         self.rabbitmq_server_host = rabbitmq_server_host
         self.connection = self.__get_connection()
         self.channel = self.connection.channel()
 
-        self.channel.queue_declare(queue="order_created_email_queue", durable=True)
+        self.channel.exchange_declare(
+            exchange="order-created", exchange_type="direct", durable=True
+        )
+
+        # self.channel.queue_declare(queue="order_created_email_queue", durable=True)
 
     def send_order_email(self, order: OrderDatabaseModel):
         # TODO: send message via rabbitmq
 
         self.channel.basic_publish(
-            exchange="",
+            exchange="order-created",
             routing_key="order_created_email_queue",
             body=order.json(),
             properties=pika.BasicProperties(delivery_mode=2),

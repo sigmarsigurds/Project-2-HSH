@@ -5,6 +5,7 @@ from APIModels.order_request_model import OrderRequestModel
 from APIModels.order_response_model import OrderResponseModel
 from Infrastructure.container import Container
 from APIModels.order_database_model import OrderDatabaseModel
+from Validations.ProductExistsValidation import ProductExistsValidation
 from Tools.FormatCreditCardNumber import FormatCreditCardNumber
 from Validations.MerchantAllowsDiscountValidation import (
     MerchantAllowsDiscountValidation,
@@ -64,6 +65,9 @@ async def save_order(
     buyer_exists_validation: BuyerExistsValidation = Depends(
         Provide[Container.buyer_exists_validation_provider]
     ),
+    product_exists_validation: ProductExistsValidation = Depends(
+        Provide[Container.product_exists_validation_provider]
+    ),
 ):
     # * Done (except for some validations)
     """
@@ -93,6 +97,10 @@ async def save_order(
     # Check if buyer exists
     buyer_exists_validation.set_buyer_id(order.buyer_id)
     order_validator.add_validation(buyer_exists_validation)
+
+    # Check if product exists
+    # product_exists_validation.set_product_id(order.product_id)
+    # order_validator.add_validation(product_exists_validation)
 
     # Check if discount is valid and allowed
     merchant_allows_discount_validation.set_merchant_id(order.merchant_id)

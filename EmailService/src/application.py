@@ -10,16 +10,24 @@ def get_connection():
 
 
 def main():
-    print("getting connection")
     connection = get_connection()
-    print("got connection")
     channel = connection.channel()
+
+    channel.exchange_declare(
+        exchange="order-created", exchange_type="direct", durable=True
+    )
 
     channel.queue_declare(queue="order_created_email_queue", durable=True)
 
+    channel.queue_bind(
+        exchange="order-created",
+        queue="order_created_email_queue",
+        routing_key="order_created_email_queue",
+    )
+
     def callback(ch, method, properties, body):
         print(" [x] Received %r" % body.decode())
-
+        time.sleep(5)
         print(" [x] Done")
         ch.basic_ack(delivery_tag=method.delivery_tag)
 
