@@ -5,6 +5,7 @@ from APIModels.order_request_model import OrderRequestModel
 from APIModels.order_response_model import OrderResponseModel
 from Infrastructure.container import Container
 from APIModels.order_database_model import OrderDatabaseModel
+from APIModels.order_reservation_model import OrderReservationModel
 from Validations.ProductExistsValidation import ProductExistsValidation
 from Tools.FormatCreditCardNumber import FormatCreditCardNumber
 from Validations.MerchantAllowsDiscountValidation import (
@@ -119,8 +120,14 @@ async def save_order(
     Then OrderService communicates next with the InventoryService with request/response based communication 
     and reserves a product with product_id. 
     """
-
-    product = {"foo": "bar"}
+    # TODO: Fetch from API
+    product_reservation = OrderReservationModel(
+        orderId=1,
+        buyerEmail="buyer@company.com",
+        merchantEmail="merchant@company.com",
+        productName="Product name...",
+        orderPrice=100,
+    )
 
     """
     If OrderServicec was successful in reserving the product (the product wasn’t sold out / the product exists) 
@@ -129,7 +136,7 @@ async def save_order(
 
     order: OrderDatabaseModel = order_repository.save_order(order)
 
-    order_sender.send_order_email(order)
+    order_sender.send_order_email(product_reservation)
 
     return {
         "data": OrderResponseModel(

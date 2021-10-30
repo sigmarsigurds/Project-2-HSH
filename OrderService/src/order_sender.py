@@ -2,6 +2,7 @@ import pika
 from retry import retry
 
 from APIModels.order_database_model import OrderDatabaseModel
+from APIModels.order_reservation_model import OrderReservationModel
 
 
 class OrderSender:
@@ -17,17 +18,17 @@ class OrderSender:
 
         # self.channel.queue_declare(queue="order_created_email_queue", durable=True)
 
-    def send_order_email(self, order: OrderDatabaseModel):
+    def send_order_email(self, reservation: OrderReservationModel):
         # TODO: send message via rabbitmq
 
         self.channel.basic_publish(
             exchange="order-created",
             routing_key="order_created_email_queue",
-            body=order.json(),
+            body=reservation.json(),
             properties=pika.BasicProperties(delivery_mode=2),
         )
 
-        print(f" [x] Sent to EmailService to email the new order '{order}'")
+        print(f" [x] Sent to EmailService to email the new order '{reservation}'")
 
     def send_order_payment(self, order: OrderDatabaseModel):
         pass
