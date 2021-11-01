@@ -5,7 +5,9 @@ from APIModels.order_request_model import OrderRequestModel
 from APIModels.order_response_model import OrderResponseModel
 from Infrastructure.container import Container
 from APIModels.order_database_model import OrderDatabaseModel
-from APIModels.order_reservation_model import OrderReservationModel
+from APIModels.order_email_information_model import OrderEmailInformationModel
+from APIModels.order_payment_information_model import OrderPaymentInformationModel
+from APIModels.credit_card_model import CreditCardModel
 from Validations.ProductExistsValidation import ProductExistsValidation
 from Tools.FormatCreditCardNumber import FormatCreditCardNumber
 from Validations.MerchantAllowsDiscountValidation import (
@@ -33,7 +35,6 @@ async def get_order(
     order: OrderDatabaseModel = order_repository.get_order(id)
     if order is None:
         raise HTTPException(status_code=404, detail="Order does not exist")
-    print("supsup")
     return {
         "data": OrderResponseModel(
             orderId=order.order_id,
@@ -121,12 +122,23 @@ async def save_order(
     and reserves a product with product_id. 
     """
     # TODO: Fetch from API
-    product_reservation = OrderReservationModel(
+    order_email_information = OrderEmailInformationModel(
         orderId=1,
         buyerEmail="buyer@company.com",
         merchantEmail="merchant@company.com",
         productName="Product name...",
         orderPrice=100,
+    )
+
+    order_payment_information = OrderPaymentInformationModel(
+        orderId=1,
+        buyerEmail="buyer@company.com",
+        merchantEmail="merchant@company.com",
+        productId=2,
+        merchantId=1,
+        creditCard=CreditCardModel(
+            cardNumber="123123123", expirationMonth=3, expirationYear=2024, cvc=424
+        ),
     )
 
     """
@@ -136,7 +148,8 @@ async def save_order(
 
     order: OrderDatabaseModel = order_repository.save_order(order)
 
-    order_sender.send_order_email(product_reservation)
+    order_sender.send_order_email(order_email_information)
+    order_sender.send_order_payment(order_payment_information)
 
     return {
         "data": OrderResponseModel(
