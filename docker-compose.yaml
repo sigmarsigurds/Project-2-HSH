@@ -8,9 +8,16 @@ services:
       - "8000:8000"
     depends_on:
       - order-database-host
+      - merchant-service-api
+      - buyer
+      - inventory-service-api
       - rabbitmq
+      - email-service
     volumes:
       - ./OrderService/src:/app
+    networks:
+      - order-network
+      - rabbitmq-network
 
   order-database-host:
     image: postgres
@@ -18,10 +25,13 @@ services:
     environment:
       - POSTGRES_USER=${ORDER_POSTGRES_USER}
       - POSTGRES_PASSWORD=${ORDER_POSTGRES_PASSWORD}
-      - POSTGRES_DB=${ORDER_POSTGRES_DB}
+      - POSTGRES_DB=${ORDER_POSTGRES_DATABASE}
     volumes:
       - order-database-data:/var/lib/postgresql/data
       - ./OrderService/MigrationScript:/docker-entrypoint-initdb.d/
+    networks:
+      - order-network
+      - rabbitmq-network
   # / Order Service
 
   # Merchant Service
@@ -43,6 +53,9 @@ services:
       - ./MerchantService/src:/app/src
     depends_on:
       - merchant-service-db
+    networks:
+      - merchant-network
+      - rabbitmq-network
 
   merchant-service-db:
     container_name: "Merchant-Service-database"
@@ -55,6 +68,9 @@ services:
     volumes:
       - merchant-service-database-data:/var/lib/postgresql/data
       - ./MerchantService/MigrationScript:/docker-entrypoint-initdb.d/
+
+    networks:
+      - merchant-network
 
   # / Merchant Service
 
@@ -69,6 +85,9 @@ services:
       - buyer_db
     volumes:
       - ./BuyerService/src:/app
+    networks:
+      - buyer-network
+      - rabbitmq-network
 
   buyer_db:
     image: postgres
@@ -79,8 +98,32 @@ services:
     volumes:
       - buyer_db-data:/var/lib/postgresql/data
       - ./BuyerService/migration_scripts:/docker-entrypoint-initdb.d/
+    networks:
+      - buyer-network
 
   # / Buyer Service
+
+  # Email Service
+  email-service:
+    build: ./EmailService
+    depends_on:
+      - rabbitmq
+    volumes:
+      - ./EmailService/src:/app
+    networks:
+      - rabbitmq-network
+  # / Email Service
+
+  # Email Service
+  payment-service:
+    build: ./PaymentService
+    depends_on:
+      - rabbitmq
+    volumes:
+      - ./PaymentService/src:/app
+    networks:
+      - rabbitmq-network
+  # / Email Service
 
   # Inventory Service
 
@@ -123,9 +166,24 @@ services:
     hostname: rabbitmq
     ports:
       - "8080:15672"
+    networks:
+      - rabbitmq-network
 
 volumes:
   order-database-data:
   merchant-service-database-data:
   inventory-service-database-data:
   buyer_db-data:
+
+networks:
+  order-network:
+    driver: bridge
+
+  buyer-network:
+    driver: bridge
+
+  merchant-network:
+    driver: bridge
+
+  rabbitmq-network:
+    driver: bridge
