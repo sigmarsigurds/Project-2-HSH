@@ -8,7 +8,11 @@ services:
       - "8000:8000"
     depends_on:
       - order-database-host
+      - merchant-service-api
+      - buyer
+      - inventory-service-api
       - rabbitmq
+      - email-service
     volumes:
       - ./OrderService/src:/app
     networks:
@@ -109,6 +113,18 @@ services:
     networks:
       - rabbitmq-network
   # / Email Service
+
+  # Email Service
+  payment-service:
+    build: ./PaymentService
+    depends_on:
+      - rabbitmq
+    volumes:
+      - ./PaymentService/src:/app
+    networks:
+      - rabbitmq-network
+  # / Email Service
+
   # Inventory Service
 
   inventory-service-api:
@@ -128,9 +144,9 @@ services:
     volumes:
       - ./InventoryService/src:/app/src
     depends_on:
-      - inventory-service-database
+      - inventory-service-db
 
-  inventory-service-database:
+  inventory-service-db:
     container_name: "Inventory-Service-database"
     image: postgres
     environment:

@@ -5,6 +5,10 @@ from APIModels.order_request_model import OrderRequestModel
 from APIModels.order_response_model import OrderResponseModel
 from Infrastructure.container import Container
 from APIModels.order_database_model import OrderDatabaseModel
+from APIModels.order_email_information_model import OrderEmailInformationModel
+from APIModels.order_payment_information_model import OrderPaymentInformationModel
+from APIModels.credit_card_model import CreditCardModel
+from Validations.ProductExistsValidation import ProductExistsValidation
 from Tools.FormatCreditCardNumber import FormatCreditCardNumber
 from Validations.MerchantAllowsDiscountValidation import (
     MerchantAllowsDiscountValidation,
@@ -31,7 +35,6 @@ async def get_order(
     order: OrderDatabaseModel = order_repository.get_order(id)
     if order is None:
         raise HTTPException(status_code=404, detail="Order does not exist")
-    print("supsup")
     return {
         "data": OrderResponseModel(
             orderId=order.order_id,
@@ -64,6 +67,9 @@ async def save_order(
     buyer_exists_validation: BuyerExistsValidation = Depends(
         Provide[Container.buyer_exists_validation_provider]
     ),
+    product_exists_validation: ProductExistsValidation = Depends(
+        Provide[Container.product_exists_validation_provider]
+    ),
 ):
     # * Done (except for some validations)
     """
@@ -94,6 +100,10 @@ async def save_order(
     buyer_exists_validation.set_buyer_id(order.buyer_id)
     order_validator.add_validation(buyer_exists_validation)
 
+    # Check if product exists
+    # product_exists_validation.set_product_id(order.product_id)
+    # order_validator.add_validation(product_exists_validation)
+
     # Check if discount is valid and allowed
     merchant_allows_discount_validation.set_merchant_id(order.merchant_id)
     merchant_allows_discount_validation.set_order_discount(order.discount)
@@ -111,8 +121,25 @@ async def save_order(
     Then OrderService communicates next with the InventoryService with request/response based communication 
     and reserves a product with product_id. 
     """
+    # TODO: Fetch from API
+    order_email_information = OrderEmailInformationModel(
+        orderId=1,
+        buyerEmail="buyer@company.com",
+        merchantEmail="merchant@company.com",
+        productName="Product name...",
+        orderPrice=100,
+    )
 
-    product = {"foo": "bar"}
+    order_payment_information = OrderPaymentInformationModel(
+        orderId=1,
+        buyerEmail="buyer@company.com",
+        merchantEmail="merchant@company.com",
+        productId=2,
+        merchantId=1,
+        creditCard=CreditCardModel(
+            cardNumber="123123123", expirationMonth=3, expirationYear=2024, cvc=424
+        ),
+    )
 
     """
     If OrderServicec was successful in reserving the product (the product wasn’t sold out / the product exists) 
@@ -121,7 +148,8 @@ async def save_order(
 
     order: OrderDatabaseModel = order_repository.save_order(order)
 
-    order_sender.send_order_email(order)
+    order_sender.send_order_email(order_email_information)
+    order_sender.send_order_payment(order_payment_information)
 
     return {
         "data": OrderResponseModel(

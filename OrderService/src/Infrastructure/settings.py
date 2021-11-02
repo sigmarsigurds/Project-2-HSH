@@ -33,6 +33,10 @@ class Settings(BaseSettings):
     buyer_service_endpoint: str
     buyer_service_port: str
 
+    inventory_service_host: str
+    inventory_service_endpoint: str
+    inventory_service_port: str
+
     class Config:
         env_file = ".env"
         env_file_encoding = "utf-8"
