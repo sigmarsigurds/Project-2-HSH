@@ -14,6 +14,8 @@ async def get_merchants(
         merchant_id: int,
         merchant_repository: MerchantRepository = Depends(Provide[Container.merchant_repository_provider])):
 
+    # TODO: Remove the data wrapper from the respond
+
     merchant = merchant_repository.get_merchant(merchant_id)
 
     if merchant is None:
@@ -29,11 +31,15 @@ async def save_merchants(
         merchant_repository: MerchantRepository = Depends(
             Provide[Container.merchant_repository_provider])):
 
-    # TODO: Create merchant
+    # TODO: Remove the data wrapper from the respond
+    # TODO: Create method should only return id
 
     merchant = merchant_repository.save_merchant(merchant)
 
     return {"data": merchant}
+
+
+# TODO: Crate enpoint merchants/{id}/allows_discount
 
 
 

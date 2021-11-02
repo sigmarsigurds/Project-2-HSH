@@ -101,9 +101,9 @@ services:
     volumes:
       - ./InventoryService/src:/app/src
     depends_on:
-      - inventory-service-database
+      - inventory-service-db
 
-  inventory-service-database:
+  inventory-service-db:
     container_name: "Inventory-Service-database"
     image: postgres
     environment:

@@ -1,1 +1,3 @@
 from src.Repositories.inventory_repository import InventoryRepository
+from src.Repositories.inventory_repository import ProductQuantityCanNotBeNegative
+from src.Repositories.inventory_repository import ProductDoesNotExist
