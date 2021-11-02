@@ -1,43 +1,35 @@
-import pika, sys, os
-import time
+import yagmail
+import pika
 from retry import retry
+from emaill import send_email
 
 
 @retry(pika.exceptions.AMQPConnectionError, delay=5, jitter=(1, 3))
 def get_connection():
-    # TODO: create rabbitmq connection
-    return pika.BlockingConnection(pika.ConnectionParameters("rabbitmq"))
+    # creating rabbitmq connection
+    return pika.BlockingConnection(pika.ConnectionParameters(host="rabbitmq"))
 
 
-def main():
-    print("getting connection")
-    connection = get_connection()
-    print("got connection")
-    channel = connection.channel()
-
-    channel.queue_declare(queue="order_created_email_queue", durable=True)
-
-    def callback(ch, method, properties, body):
-        print(" [x] Received %r" % body.decode())
-
-        print(" [x] Done")
-        ch.basic_ack(delivery_tag=method.delivery_tag)
-
-    channel.basic_qos(prefetch_count=1)
-    channel.basic_consume(
-        queue="order_created_email_queue", on_message_callback=callback
-    )
-
-    print(" [*] Waiting for messages. To exit press CTRL+C")
-    channel.start_consuming()
+# send_email()
 
 
 if __name__ == "__main__":
-    try:
-        main()
-    except KeyboardInterrupt:
-        print("Interrupted")
-        try:
-            sys.exit(0)
-        except SystemExit:
-            os._exit(0)
+
+    connection = get_connection()
+    channel = connection.channel()
+
+    channel.exchange_declare(exchange="emails", exchange_type="fanout")
+
+    result = channel.queue_declare(queue="", exclusive=True)
+    email_queue = result.method.queue
+
+    channel.queue_bind(exchange="emails", queue=email_queue)
+    print(" [*] Waiting for email. To exit press CTRL+C")
+
+    def callback(body):
+        print("it work")
+
+    channel.basic_consume(
+        queue=email_queue, on_message_callback=callback, auto_ack=True
+    )
+    channel.start_consuming()
