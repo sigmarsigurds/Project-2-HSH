@@ -1,0 +1,19 @@
+version: "3.8"
+services:
+
+  email:
+    build: ./src
+    container_name: "email_container"
+    ports: 
+      - "8000:8000"
+    depends_on:
+      - rabbitmq
+    volumes:
+      - ./src:/app
+  
+  rabbitmq:
+    image: rabbitmq:3.9.8-management
+    ports: 
+      - "5672:5672"     # amqp protocol port
+      - "15672:15672"   # http port
+    

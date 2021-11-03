@@ -1,4 +1,3 @@
-from EmailService.src.email_model import EmailModel
 import pika, sys, os
 import time
 from retry import retry
