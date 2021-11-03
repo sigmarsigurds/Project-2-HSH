@@ -35,16 +35,14 @@ async def get_order(
     order: OrderDatabaseModel = order_repository.get_order(id)
     if order is None:
         raise HTTPException(status_code=404, detail="Order does not exist")
-    return {
-        "data": OrderResponseModel(
-            orderId=order.order_id,
-            productId=order.product_id,
-            merchantId=order.merchant_id,
-            buyerId=order.buyer_id,
-            cardNumber=order.credit_card.card_number,
-            totalPrice=order.discount,
-        )
-    }
+    return OrderResponseModel(
+        orderId=order.order_id,
+        productId=order.product_id,
+        merchantId=order.merchant_id,
+        buyerId=order.buyer_id,
+        cardNumber=order.credit_card.card_number,
+        totalPrice=order.discount,
+    )
 
 
 @router.post("/orders", status_code=201)
@@ -101,8 +99,8 @@ async def save_order(
     order_validator.add_validation(buyer_exists_validation)
 
     # Check if product exists
-    # product_exists_validation.set_product_id(order.product_id)
-    # order_validator.add_validation(product_exists_validation)
+    product_exists_validation.set_product_id(order.product_id)
+    order_validator.add_validation(product_exists_validation)
 
     # Check if discount is valid and allowed
     merchant_allows_discount_validation.set_merchant_id(order.merchant_id)
@@ -122,12 +120,13 @@ async def save_order(
     and reserves a product with product_id. 
     """
     # TODO: Fetch from API
+
     order_email_information = OrderEmailInformationModel(
         orderId=1,
         buyerEmail="buyer@company.com",
         merchantEmail="merchant@company.com",
         productName="Product name...",
-        orderPrice=100,
+        orderPrice=100,  # This will be multiplied by the discount
     )
 
     order_payment_information = OrderPaymentInformationModel(
@@ -151,13 +150,11 @@ async def save_order(
     order_sender.send_order_email(order_email_information)
     order_sender.send_order_payment(order_payment_information)
 
-    return {
-        "data": OrderResponseModel(
-            orderId=order.order_id,
-            productId=order.product_id,
-            merchantId=order.merchant_id,
-            buyerId=order.buyer_id,
-            cardNumber=FormatCreditCardNumber.format(order.credit_card.card_number),
-            totalPrice=-1,
-        )
-    }
+    return OrderResponseModel(
+        orderId=order.order_id,
+        productId=order.product_id,
+        merchantId=order.merchant_id,
+        buyerId=order.buyer_id,
+        cardNumber=FormatCreditCardNumber.format(order.credit_card.card_number),
+        totalPrice=-1,
+    )

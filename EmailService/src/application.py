@@ -17,12 +17,12 @@ def main():
         exchange="order-created", exchange_type="direct", durable=True
     )
 
-    channel.queue_declare(queue="order_created_email_queue", durable=True)
+    channel.queue_declare(queue="send-email-queue", durable=True)
 
     channel.queue_bind(
         exchange="order-created",
-        queue="order_created_email_queue",
-        routing_key="order_created_email_queue",
+        queue="send-email-queue",
+        routing_key="send-email",
     )
 
     def callback(ch, method, properties, body):
@@ -32,9 +32,7 @@ def main():
         ch.basic_ack(delivery_tag=method.delivery_tag)
 
     channel.basic_qos(prefetch_count=1)
-    channel.basic_consume(
-        queue="order_created_email_queue", on_message_callback=callback
-    )
+    channel.basic_consume(queue="send-email-queue", on_message_callback=callback)
 
     print(" [*] Waiting for messages. To exit press CTRL+C")
     channel.start_consuming()

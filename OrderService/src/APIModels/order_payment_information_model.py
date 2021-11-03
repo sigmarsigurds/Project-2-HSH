@@ -10,3 +10,4 @@ class OrderPaymentInformationModel(BaseModel):
     product_id: int = Field(..., alias="productId")
     merchant_id: int = Field(..., alias="merchantId")
     credit_card: CreditCardModel = Field(..., alias="creditCard")
+    quantity: int = 1
