@@ -51,7 +51,7 @@ class PaymentQueueReceiving:
 
         self.__channel.basic_qos(prefetch_count=1)
         self.__channel.basic_consume(
-            queue="payment-succeeded-queue", on_message_callback=self.__on_payment_succeeded()
+            queue="payment-succeeded-queue", on_message_callback=self.__on_payment_succeeded
         )
 
 
@@ -77,5 +77,9 @@ class PaymentQueueReceiving:
 
         self.__event_finished(ch, method)  # This could be done with decorator
 
+
+    def start(self):
+        print(" [*] Waiting for messages. To exit press CTRL+C")
+        self.__channel.start_consuming()
 
 

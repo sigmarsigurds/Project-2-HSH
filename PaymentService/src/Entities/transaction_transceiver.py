@@ -126,7 +126,7 @@ class TransactionTransceiver:
         # Send transaction status mail
         self.__channel.basic_publish(
             exchange="payment-processed",
-            routing_key="payment-success",
+            routing_key="payment-succeeded",
             body=inventory_model.json(),
         )
         print(f" [x] Sent to success-queue, transaction succeeded")
