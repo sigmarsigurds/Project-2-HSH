@@ -1,5 +1,8 @@
 from dependency_injector import containers, providers
 from APIModels.service_model import ServiceModel
+from APIGateway.BuyerGateway import BuyerGateway
+from APIGateway.InventoryGateway import InventoryGateway
+from APIGateway.MerchantGateway import MerchantGateway
 from Validations.ProductBelongsToMerchantValidation import (
     ProductBelongsToMerchantValidation,
 )
@@ -41,6 +44,7 @@ class Container(containers.DeclarativeContainer):
         # queue_name=config.queue_name,
         rabbitmq_server_host=config.rabbitmq_server_host,
     )
+
     __merchant_service = providers.Factory(
         ServiceModel,
         host=config.merchant_service_host,
@@ -48,12 +52,14 @@ class Container(containers.DeclarativeContainer):
         endpoint=config.merchant_service_endpoint,
     )
 
+    merchant_gateway_provider = providers.Singleton(MerchantGateway, __merchant_service)
+
     merchant_exists_validation_provider = providers.Singleton(
-        MerchantExistsValidation, __merchant_service
+        MerchantExistsValidation, merchant_gateway_provider
     )
 
     merchant_allows_discount_validation_provider = providers.Singleton(
-        MerchantAllowsDiscountValidation, __merchant_service
+        MerchantAllowsDiscountValidation, merchant_gateway_provider
     )
 
     __buyer_service = providers.Factory(
@@ -63,8 +69,10 @@ class Container(containers.DeclarativeContainer):
         endpoint=config.buyer_service_endpoint,
     )
 
+    buyer_gateway_provider = providers.Singleton(BuyerGateway, __buyer_service)
+
     buyer_exists_validation_provider = providers.Singleton(
-        BuyerExistsValidation, __buyer_service
+        BuyerExistsValidation, buyer_gateway_provider
     )
 
     __inventory_service = providers.Factory(
@@ -74,16 +82,20 @@ class Container(containers.DeclarativeContainer):
         endpoint=config.inventory_service_endpoint,
     )
 
+    inventory_gateway_provider = providers.Singleton(
+        InventoryGateway, __inventory_service
+    )
+
     product_exists_validation_provider = providers.Singleton(
-        ProductExistsValidation, __inventory_service
+        ProductExistsValidation, inventory_gateway_provider
     )
 
     product_in_stock_validation_provider = providers.Singleton(
-        ProductInStockValidation, __inventory_service
+        ProductInStockValidation, inventory_gateway_provider
     )
 
     product_belongs_to_merchant_validation_provider = providers.Singleton(
-        ProductBelongsToMerchantValidation, __inventory_service
+        ProductBelongsToMerchantValidation, inventory_gateway_provider
     )
 
     order_validator_provider = providers.Singleton(OrderValidator)

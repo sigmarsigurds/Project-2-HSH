@@ -1,15 +1,12 @@
 from typing import Optional
 from fastapi import HTTPException
-import requests
-from APIModels.service_model import ServiceModel
+from APIGateway.MerchantGateway import MerchantGateway
 from Validations.Validation import Validation
 
 
 class MerchantAllowsDiscountValidation(Validation):
-    def __init__(self, service: ServiceModel) -> None:
-        self.__request_url: str = (
-            f"http://{service.host}:{service.port}/{service.endpoint}/"
-        )
+    def __init__(self, gateway: MerchantGateway) -> None:
+        self.__gateway = gateway
         self.__merchant_id: int = None
         self.__fail_message: str = "Merchant does not allow discount"
         self.__order_discount: Optional[float] = None
@@ -20,20 +17,15 @@ class MerchantAllowsDiscountValidation(Validation):
         if self.__order_discount is None or self.__order_discount == 0:
             return True
 
-        # Get a response from the MerchantService API
-        response = requests.get(f"{self.__request_url}{self.__merchant_id}")
-
         # If we didn't get a valid response, that's just akward
-        if response.status_code != 200:
+        if not self.__gateway.exists(self.__merchant_id):
             raise HTTPException(
                 status_code=418,
-                detail="Something went wrong when connecting to the MerchantService API",
+                detail="Merchant does not exist",
             )
 
-        allows_discount = response.json().get("allowsDiscount", False)
-
         # If the order has a discount on it and the merchant does not allow discounts, send error
-        if not allows_discount:
+        if not self.__gateway.allows_discount(self.__merchant_id):
             raise HTTPException(status_code=400, detail=self.__fail_message)
 
         # If the order has a discount on it and the merchant does allow discounts, check if the number is range ]0,1]

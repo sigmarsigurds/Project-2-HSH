@@ -11,6 +11,9 @@ from APIModels.order_payment_information_model import OrderPaymentInformationMod
 from APIModels.credit_card_model import CreditCardModel
 from APIModels.service_model import ServiceModel
 from APIModels.product_model import ProductModel
+from APIGateway.BuyerGateway import BuyerGateway
+from APIGateway.InventoryGateway import InventoryGateway
+from APIGateway.MerchantGateway import MerchantGateway
 from Validations.ProductBelongsToMerchantValidation import (
     ProductBelongsToMerchantValidation,
 )
@@ -86,23 +89,14 @@ async def save_order(
         Provide[Container.merchant_service_provider]
     ),
     buyer_service: ServiceModel = Depends(Provide[Container.buyer_service_provider]),
+    inventory_gateway: InventoryGateway = Depends(
+        Provide[Container.inventory_gateway_provider]
+    ),
+    merchant_gateway: MerchantGateway = Depends(
+        Provide[Container.merchant_gateway_provider]
+    ),
+    buyer_gateway: BuyerGateway = Depends(Provide[Container.buyer_gateway_provider]),
 ):
-    # * Done
-    """
-    When OrderService gets the request to create an order,
-    it communicates with MerchantService and BuyerService with Request/Response based communication
-    (for example REST) and checks if there is a buyer and merchanr for the correspondent buyer_id og merchant_id.
-    """
-    """
-    * DONE
-    • OrderService should return 400 HTTP Status Code with the error message "Merchant does not exist" if there is no merchant with the specific merchantId.
-    • OrderService should return 400 HTTP Status Code with the error message "Buyer does not exist" if there is not buyer with the specific buyerId
-    • OrderService should return 400 HTTP Status Code with the error message "Merchant does not allow discount" if merchant with merchantId does not allow discounts and the specified discount is something other then null or 0.
-    • OrderService should return 400 HTTP Status Code with the error message "Product does not exist" if there is no product with the specific productId
-    • OrderService should return 400 HTTP Status Code with the error message "Product is sold out" if a product with the specific productId is sold out.
-    • OrderService should return 400 HTTP Status Code with the error message "Product does not belong to merchant" if product with productId does not belong to merchant with merchantId.
-    • If all the validations are successful then the OrderSErvie should reserve the product, store it in the database, send an event that the order has been created and return 201 HTTP Status Code með order id-i sem response message.
-    """
 
     # Empty any previous validations
     order_validator.clear_validations()
@@ -138,7 +132,6 @@ async def save_order(
         ]
     )
 
-    # TODO: Look into background_tasks for something like this (https://youtu.be/ESVwKQLldjg?t=1065)
     # Execute all checks above and raise errors if anything is invalid
     order_validator.validate()
 
@@ -148,14 +141,11 @@ async def save_order(
     and reserves a product with product_id. 
     """
 
-    response = requests.patch(
-        url=f"http://{inventory_service.host}:{inventory_service.port}/{inventory_service.endpoint}/{order_request.product_id}/reserve",
-        json={"quantity": 1},
-    )
+    product = inventory_gateway.reserve(order_request.product_id)
 
-    if response.status_code != 200:
+    if product is None:
         raise HTTPException(
-            status_code=418,
+            status_code=400,
             detail="Inventory Service was not able to reserve the product",
         )
 
@@ -163,37 +153,12 @@ async def save_order(
     If OrderServicec was successful in reserving the product (the product wasn’t sold out / the product exists) 
     then OrderServices stores the order in it’s database and sends out an event that the order has been created.
     """
-
-    product_data: dict = response.json()
-
-    product = ProductModel(
-        productId=order_request.product_id,
-        merchantId=product_data.get("merchantId"),
-        productName=product_data.get("productName"),
-        price=product_data.get("price"),
-        quantity=product_data.get("quantity"),
-        reserved=product_data.get("reserved"),
-    )
-
-    merchant_email = (
-        requests.get(
-            url=f"http://{merchant_service.host}:{merchant_service.port}/{merchant_service.endpoint}/{order_request.merchant_id}"
-        )
-        .json()
-        .get("email")
-    )
-
-    buyer_email = (
-        requests.get(
-            url=f"http://{buyer_service.host}:{buyer_service.port}/{buyer_service.endpoint}/{order_request.buyer_id}"
-        )
-        .json()
-        .get("email")
-    )
-
     order_database: OrderDatabaseModel = order_repository.save_order(
         order_request, product
     )
+
+    merchant_email = merchant_gateway.get_merchant_email(order_request.merchant_id)
+    buyer_email = buyer_gateway.get_buyer_email(order_request.buyer_id)
 
     order_email_information = OrderEmailInformationModel(
         orderId=order_database.order_id,
