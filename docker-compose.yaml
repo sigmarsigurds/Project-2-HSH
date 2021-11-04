@@ -52,7 +52,7 @@ services:
     volumes:
       - ./MerchantService/src:/app/src
     depends_on:
-      - merchant-service-db
+      - Merchant-Service-database
     networks:
       - merchant-network
       - rabbitmq-network
@@ -91,6 +91,7 @@ services:
 
   buyer_db:
     image: postgres
+    container_name: buyer_db
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=password
@@ -136,7 +137,7 @@ services:
     volumes:
       - ./InventoryService/src:/app/src
     depends_on:
-      - inventory-service-db
+      - Inventory-Service-database
       - rabbitmq
     networks:
       - rabbitmq-network
@@ -150,7 +151,7 @@ services:
       - POSTGRES_PASSWORD=password
       - POSTGRES_DB=inventory_db
       - RABBITMQ_SERVER_HOST=rabbitmq
-      
+
     volumes:
       - inventory-service-database-data:/var/lib/postgresql/data
       - ./InventoryService/MigrationScript:/docker-entrypoint-initdb.d/
@@ -168,7 +169,6 @@ services:
     networks:
       - rabbitmq-network
 
-
   payment-service-api:
     container_name: "Payment-Service-api"
     build: ./PaymentService
@@ -182,7 +182,7 @@ services:
     volumes:
       - ./PaymentService/src:/app/src
     depends_on:
-      - payment-service-db
+      - Payment-Service-database
       - rabbitmq
     networks:
       - rabbitmq-network
@@ -226,4 +226,3 @@ networks:
 
   payment-service-network:
     driver: bridge
-  
