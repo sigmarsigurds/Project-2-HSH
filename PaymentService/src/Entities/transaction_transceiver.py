@@ -63,7 +63,6 @@ class TransactionTransceiver:
             queue="order-created-payment-queue", on_message_callback=self.__callback
         )
 
-
     @staticmethod
     def __create_order_payment_information_model(body: dict):
         credit_card_dict = body.get("credit_card", {})
@@ -84,7 +83,7 @@ class TransactionTransceiver:
             product_id=body.get("product_id"),
             merchant_id=body.get("merchant_id"),
             credit_card=credit_card,
-            quantity=body.get("quantity")
+            quantity=body.get("quantity"),
         )
 
     def __transaction_failed(
@@ -150,12 +149,10 @@ class TransactionTransceiver:
             body=email_model.json(),
         )
 
-
     @staticmethod
     def __parse_body(body):
         body = body.decode()
         return json.loads(body)
-
 
     def __callback(self, ch, method, properties, body):
         print(" [x] Received %r" % body.decode())
@@ -180,6 +177,9 @@ class TransactionTransceiver:
             self.__transaction_failed(
                 inventory_model, order_id, customer_email, merchant_email
             )
+            print(" [x] Done")
+            ch.basic_ack(delivery_tag=method.delivery_tag)
+            return
 
         del (
             order_payment_information.credit_card
@@ -188,7 +188,6 @@ class TransactionTransceiver:
             inventory_model, order_id, customer_email, merchant_email
         )
 
-        time.sleep(5)
         print(" [x] Done")
         ch.basic_ack(delivery_tag=method.delivery_tag)
 
