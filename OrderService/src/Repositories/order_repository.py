@@ -16,10 +16,10 @@ class OrderRepository:
             INSERT INTO "CreditCard" (card_id, card_number, expiration_month, expiration_year, cvc) 
             VALUES (
                     DEFAULT, 
-                    '{order.credit_card.card_number}', 
-                    '{order.credit_card.expiration_month}',
-                    '{order.credit_card.expiration_year}',
-                    '{order.credit_card.cvc}'
+                    {order.credit_card.card_number}, 
+                    {order.credit_card.expiration_month},
+                    {order.credit_card.expiration_year},
+                    {order.credit_card.cvc}
                     )
             RETURNING card_id, card_number, expiration_month, expiration_year, cvc;
             """
@@ -29,11 +29,11 @@ class OrderRepository:
             INSERT INTO "Order" (order_id, product_id, merchant_id, buyer_id, card_id, discount) 
             VALUES (
                     DEFAULT, 
-                    '{order.product_id}', 
-                    '{order.merchant_id}',
-                    '{order.buyer_id}',
-                    '{credit_card_results[0][0]}',
-                    '{order.discount}'
+                    {order.product_id}, 
+                    {order.merchant_id},
+                    {order.buyer_id},
+                    {credit_card_results[0][0]},
+                    {order.discount}
                     )
             RETURNING order_id, product_id, merchant_id, buyer_id, discount;
             """
