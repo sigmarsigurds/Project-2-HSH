@@ -21,8 +21,9 @@ class PaymentQueueReceiving:
     @retry(pika.exceptions.AMQPConnectionError, delay=5, jitter=(1, 3))
     def __get_connection(rabbitmq_server_host: str):
         # TODO: create rabbitmq connection
-        return pika.BlockingConnection(pika.ConnectionParameters(rabbitmq_server_host))
-
+        return pika.BlockingConnection(
+            pika.ConnectionParameters(rabbitmq_server_host, heartbeat=500)
+        )
 
     def __set_up_payment_failed_queue(self):
         self.__channel.queue_declare(queue="payment-failed-queue", durable=True)
@@ -50,7 +51,7 @@ class PaymentQueueReceiving:
 
         self.__channel.basic_qos(prefetch_count=1)
         self.__channel.basic_consume(
-            queue="payment-succeeded-queue", on_message_callback=self.__on_payment_succeeded
+            queue="payment-succeeded-queue", on_message_callback=self.__on_payment_succeeded()
         )
 
 
@@ -68,17 +69,13 @@ class PaymentQueueReceiving:
         self.__event_finished(ch, method)  # This could be done with decorator
 
 
+
     def __on_payment_succeeded(self, ch, method, properties, body):
         print("Payment succeeded")
         print(body.decode())
 
 
         self.__event_finished(ch, method)  # This could be done with decorator
-
-
-    def start(self):
-        print(" [*] Waiting for messages. To exit press CTRL+C")
-        self.__channel.start_consuming()
 
 
 

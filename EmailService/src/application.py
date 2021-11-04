@@ -10,7 +10,7 @@ from email_model import EmailModel
 @retry(pika.exceptions.AMQPConnectionError, delay=5, jitter=(1, 3))
 def get_connection():
     # TODO: create rabbitmq connection
-    return pika.BlockingConnection(pika.ConnectionParameters("rabbitmq", heartbeat=5))
+    return pika.BlockingConnection(pika.ConnectionParameters("rabbitmq", heartbeat=500))
 
 
 def create_email_model(body):

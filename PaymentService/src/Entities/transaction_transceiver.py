@@ -36,7 +36,9 @@ class TransactionTransceiver:
     @retry(pika.exceptions.AMQPConnectionError, delay=5, jitter=(1, 3))
     def __get_connection(rabbitmq_server_host: str):
         # TODO: create rabbitmq connection
-        return pika.BlockingConnection(pika.ConnectionParameters(rabbitmq_server_host))
+        return pika.BlockingConnection(
+            pika.ConnectionParameters(rabbitmq_server_host, heartbeat=500)
+        )
 
     def __set_up_sending_queue(self):
         self.__channel.exchange_declare(
