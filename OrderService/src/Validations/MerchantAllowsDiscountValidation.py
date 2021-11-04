@@ -17,7 +17,7 @@ class MerchantAllowsDiscountValidation(Validation):
     def validate(self) -> bool:
 
         # If the order does not have any discount, we move on the validation, no further checks are needed
-        if self.__order_discount is None:
+        if self.__order_discount is None or self.__order_discount == 0:
             return True
 
         # Get a response from the MerchantService API

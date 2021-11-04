@@ -67,5 +67,5 @@ class OrderSender:
     def __get_connection(self):
         # TODO: create rabbitmq connection
         return pika.BlockingConnection(
-            pika.ConnectionParameters(self.rabbitmq_server_host)
+            pika.ConnectionParameters(self.rabbitmq_server_host, heartbeat=5)
         )
