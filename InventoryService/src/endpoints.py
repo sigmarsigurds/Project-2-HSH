@@ -193,12 +193,6 @@ async def sells_product(
     return product
 
 
-@router.on_event('startup')
-@inject
-async def get_message(payment_queue_receiver=Provide[Container.payment_queue_receiver_provider]):
-    thread = threading.Thread(target=payment_queue_receiver.start)
-    thread.start()
-
 # ! DELETE THIS
 @router.post("/products/{product_id}/free_reserved", status_code=200)
 @inject

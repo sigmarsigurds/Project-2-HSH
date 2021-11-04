@@ -25,7 +25,7 @@ class Container(containers.DeclarativeContainer):
     )
 
     payment_queue_receiver_provider = providers.Singleton(PaymentQueueReceiving,
-                                                 rabbitmq_server_host=config.rabbitmq_server_host)
+                                                          rabbitmq_server_host=config.rabbitmq_server_host)
 
     __db_connection = providers.Singleton(PostgresDbConnection, __db_config)
 

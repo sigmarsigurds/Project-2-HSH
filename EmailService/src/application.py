@@ -35,6 +35,9 @@ def main():
     channel.exchange_declare(
         exchange="order-created", exchange_type="direct", durable=True
     )
+    channel.exchange_declare(
+        exchange="payment-processed", exchange_type="direct", durable=True
+    )
 
     channel.queue_declare(queue="send-email-queue", durable=True)
 
@@ -42,6 +45,10 @@ def main():
         exchange="order-created",
         queue="send-email-queue",
         routing_key="send-email",
+    )
+
+    channel.queue_bind(
+        exchange="payment-processed", queue="send-email-queue", routing_key="send-email"
     )
 
     def callback(ch, method, properties, body):
