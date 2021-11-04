@@ -24,6 +24,8 @@ async def get_merchants(
     if merchant is None:
         raise HTTPException(status_code=404, detail="Item not found")
 
+    del merchant.id
+
     return merchant
 
 

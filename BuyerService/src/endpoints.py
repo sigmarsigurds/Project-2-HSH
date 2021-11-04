@@ -19,6 +19,9 @@ async def get_buyer(
     buyer: BuyerModel = buyer_repository.get_buyer(id)
     if buyer is None:
         raise HTTPException(status_code=404, detail="Buyer does not exist")
+
+    del buyer.buyerId
+
     return buyer
 
 
