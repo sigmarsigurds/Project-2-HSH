@@ -176,7 +176,8 @@ async def save_order(
         merchantId=order_database.merchant_id,
         creditCard=order_request.credit_card,
     )
-
+    print("yayy")
+    print(order_email_information)
     order_sender.send_order_email(order_email_information)
     order_sender.send_order_payment(order_payment_information)
 

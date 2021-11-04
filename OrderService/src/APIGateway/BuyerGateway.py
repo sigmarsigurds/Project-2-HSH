@@ -10,7 +10,7 @@ class BuyerGateway:
 
     def get_buyer_email(self, buyer_id: int) -> str:
         buyer = self.__get_buyer(buyer_id)
-        return buyer.buyer_id
+        return buyer.email
 
     def exists(self, buyer_id: int) -> bool:
         buyer = self.__get_buyer(buyer_id)
