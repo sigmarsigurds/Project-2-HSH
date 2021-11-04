@@ -24,7 +24,7 @@ class OrderSender:
 
         self.channel.basic_publish(
             exchange="order-created",
-            routing_key="order_created_email_queue",
+            routing_key="   ",
             body=order_email_information.json(),
             properties=pika.BasicProperties(delivery_mode=2),
         )

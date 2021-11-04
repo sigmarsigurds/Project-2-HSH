@@ -169,10 +169,44 @@ services:
     networks:
       - rabbitmq-network
 
+
+  payment-service-api:
+    container_name: "Payment-Service-api"
+    build: ./PaymentService
+    environment:
+      - POSTGRES_HOST=payment-service-database
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DATABASE=transaction_db
+      - ENVIRONMENT=dev
+      - RABBITMQ_SERVER_HOST=rabbitmq
+    volumes:
+      - ./PaymentService/src:/app/src
+    depends_on:
+      - payment-service-db
+      - rabbitmq
+    networks:
+      - rabbitmq-network
+      - payment-service-network
+
+  payment-service-db:
+    container_name: "Payment-Service-database"
+    image: postgres
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=transaction_db
+    networks:
+      - payment-service-network
+    volumes:
+      - payment-service-database-data:/var/lib/postgresql/data
+      - ./PaymentService/MigrationScript:/docker-entrypoint-initdb.d/
+
 volumes:
   order-database-data:
   merchant-service-database-data:
   inventory-service-database-data:
+  payment-service-database-data:
   buyer_db-data:
 
 networks:
@@ -187,3 +221,7 @@ networks:
 
   rabbitmq-network:
     driver: bridge
+
+  payment-service-network:
+    driver: bridge
+  
