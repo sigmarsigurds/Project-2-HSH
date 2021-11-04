@@ -128,6 +128,7 @@ services:
       - POSTGRES_DATABASE=inventory_db
       - MERCHANT_SERVICE_HOST=merchant-service-api
       - MERCHANT_SERVICE_PORT=8001
+      - RABBITMQ_SERVER_HOST=rabbitmq
       - ENVIRONMENT=dev
 
     ports:
@@ -136,6 +137,7 @@ services:
       - ./InventoryService/src:/app/src
     depends_on:
       - inventory-service-db
+      - rabbitmq-network
     networks:
       - rabbitmq-network
       - inventory-network

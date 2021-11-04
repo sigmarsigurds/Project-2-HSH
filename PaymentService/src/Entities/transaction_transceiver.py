@@ -26,11 +26,13 @@ class TransactionTransceiver:
         self.__set_up_receiving_queue()
         self.__set_up_sending_queue()
 
+
     @staticmethod
     @retry(pika.exceptions.AMQPConnectionError, delay=5, jitter=(1, 3))
     def __get_connection(rabbitmq_server_host: str):
         # TODO: create rabbitmq connection
         return pika.BlockingConnection(pika.ConnectionParameters(rabbitmq_server_host))
+
 
     def __set_up_sending_queue(self):
         self.__channel.exchange_declare(
@@ -38,6 +40,7 @@ class TransactionTransceiver:
             exchange_type="direct",
             durable=True
         )
+
 
     def __set_up_receiving_queue(self):
         self.__channel.exchange_declare(
@@ -58,6 +61,7 @@ class TransactionTransceiver:
         self.__channel.basic_consume(
             queue="order-created-payment-queue", on_message_callback=self.__callback
         )
+
 
     @staticmethod
     def __create_order_payment_information_model(body: dict):
@@ -87,7 +91,7 @@ class TransactionTransceiver:
         # Send transaction status mail
         self.__channel.basic_publish(
             exchange="payment-processed",
-            routing_key="payment-failed-queue",
+            routing_key="payment-failed",
             body=inventory_model.json(),
         )
 
@@ -100,6 +104,7 @@ class TransactionTransceiver:
 
         self.__send_email(email_to_customer)
         self.__send_email(email_to_merchant)
+
 
     def __transaction_succeeded(self, inventory_model: InventoryEventModel, order_id, customer_email, merchant_email):
         # Send transaction succeeded event
@@ -107,7 +112,7 @@ class TransactionTransceiver:
         # Send transaction status mail
         self.__channel.basic_publish(
             exchange="payment-processed",
-            routing_key="payment-success-queue",
+            routing_key="payment-success",
             body=inventory_model.json(),
         )
 
@@ -121,10 +126,11 @@ class TransactionTransceiver:
         self.__send_email(email_to_customer)
         self.__send_email(email_to_merchant)
 
+
     def __send_email(self, email_model: EmailEventModel):
         self.__channel.basic_publish(
             exchange="payment-processed",
-            routing_key="send-email-queue",
+            routing_key="send-email",
             body=email_model.json(),
         )
 

@@ -25,6 +25,8 @@ class Settings(BaseSettings):
     merchant_service_host: str
     merchant_service_port: str
 
+    rabbitmq_server_host: str
+
     environment: Environment
 
     class Config:
@@ -57,5 +59,8 @@ class Settings(BaseSettings):
             'merchant_service_port': {
                 'env': 'MERCHANT_SERVICE_PORT'
             },
+            'rabbitmq_server_host': {
+                'env': 'RABBITMQ_SERVER_HOST'
+            }
         }
 

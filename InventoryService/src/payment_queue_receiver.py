@@ -5,8 +5,8 @@ from retry import retry
 
 
 class PaymentQueueReceiving:
-    def __init__(self):
-        self.__connection = self.__get_connection()
+    def __init__(self, rabbitmq_server_host: str):
+        self.__connection = self.__get_connection(rabbitmq_server_host)
         self.__channel = self.__connection.channel()
 
         self.__channel.exchange_declare(
@@ -30,7 +30,7 @@ class PaymentQueueReceiving:
         self.__channel.queue_bind(
             exchange="payment-processed",
             queue="payment-failed-queue",
-            routing_key="payment-failed-queue",
+            routing_key="payment-failed",
         )
 
         self.__channel.basic_qos(prefetch_count=1)
@@ -45,12 +45,12 @@ class PaymentQueueReceiving:
         self.__channel.queue_bind(
             exchange="payment-processed",
             queue="payment-succeeded-queue",
-            routing_key="payment-succeeded-queue",
+            routing_key="payment-succeeded",
         )
 
         self.__channel.basic_qos(prefetch_count=1)
         self.__channel.basic_consume(
-            queue="payment-succeeded-queue", on_message_callback=self.__on_payment_succeeded()
+            queue="payment-succeeded-queue", on_message_callback=self.__on_payment_succeeded
         )
 
 
@@ -68,13 +68,17 @@ class PaymentQueueReceiving:
         self.__event_finished(ch, method)  # This could be done with decorator
 
 
-
     def __on_payment_succeeded(self, ch, method, properties, body):
         print("Payment succeeded")
         print(body.decode())
 
 
         self.__event_finished(ch, method)  # This could be done with decorator
+
+
+    def start(self):
+        print(" [*] Waiting for messages. To exit press CTRL+C")
+        self.__channel.start_consuming()
 
 
 
