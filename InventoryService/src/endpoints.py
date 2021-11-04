@@ -51,7 +51,7 @@ async def get_product(
         )
 
     except ProductDoesNotExist:
-        return HTTPException(status_code=404, detail="Item not found")
+        raise HTTPException(status_code=404, detail="Item not found")
 
     del product.id  # Remove the product id from the respond data
     return product

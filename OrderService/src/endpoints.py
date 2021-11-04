@@ -123,9 +123,9 @@ async def save_order(
 
     order_email_information = OrderEmailInformationModel(
         orderId=1,
-        buyerEmail="buyer@company.com",
-        merchantEmail="merchant@company.com",
-        productName="Product name...",
+        buyerEmail="psteinninn@gmail.com",
+        merchantEmail="robertingi00@gmail.com",
+        productName="iPad Bro",
         orderPrice=100,  # This will be multiplied by the discount
     )
 
