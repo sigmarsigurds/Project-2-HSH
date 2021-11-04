@@ -41,7 +41,7 @@ async def save_merchants(
 
     merchant = merchant_repository.save_merchant(merchant)
 
-    return merchant
+    return merchant.id
 
 
 # TODO: Crate enpoint merchants/{id}/allows_discount

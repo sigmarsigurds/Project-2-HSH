@@ -23,33 +23,19 @@ class TransactionTransceiver:
         self.__set_up_receiving_queue()
         self.__set_up_sending_queue()
 
+
     @staticmethod
-    def __create_order_payment_information_model(body: dict):
-
-        credit_card_dict = body.get("creditCard", {})
-
-        credit_card = CreditCardModel(
-            cardNumer=credit_card_dict.get("cardNumber"),
-            expiration_month=credit_card_dict.get("expirationMonth"),
-            expiration_year=credit_card_dict.get("expirationYear"),
-            csv=credit_card_dict.get("cvc")
-        )
-
-        return OrderPaymentInformationModel(
-            orderId=body.get("orderId"),
-            buyerEmail=body.get("buyerEmail"),
-            merchantEmail=body.get("merchantEmail"),
-            productId=body.get("productId"),
-            merchantId=body.get("merchantId"),
-            creaditCard=credit_card
-        )
+    @retry(pika.exceptions.AMQPConnectionError, delay=5, jitter=(1, 3))
+    def __get_connection(rabbitmq_server_host: str):
+        # TODO: create rabbitmq connection
+        return pika.BlockingConnection(pika.ConnectionParameters(rabbitmq_server_host))
 
 
     def __set_up_sending_queue(self):
         self.__channel.exchange_declare(
             exchange="payment-processed",
             exchange_type="direct",
-            durable=True  # Not broken
+            durable=True
         )
 
 
@@ -73,10 +59,25 @@ class TransactionTransceiver:
 
 
     @staticmethod
-    @retry(pika.exceptions.AMQPConnectionError, delay=5, jitter=(1, 3))
-    def __get_connection(rabbitmq_server_host: str):
-        # TODO: create rabbitmq connection
-        return pika.BlockingConnection(pika.ConnectionParameters(rabbitmq_server_host))
+    def __create_order_payment_information_model(body: dict):
+
+        credit_card_dict = body.get("creditCard", {})
+
+        credit_card = CreditCardModel(
+            cardNumer=credit_card_dict.get("cardNumber"),
+            expiration_month=credit_card_dict.get("expirationMonth"),
+            expiration_year=credit_card_dict.get("expirationYear"),
+            csv=credit_card_dict.get("cvc")
+        )
+
+        return OrderPaymentInformationModel(
+            orderId=body.get("orderId"),
+            buyerEmail=body.get("buyerEmail"),
+            merchantEmail=body.get("merchantEmail"),
+            productId=body.get("productId"),
+            merchantId=body.get("merchantId"),
+            creaditCard=credit_card
+        )
 
 
     def __transaction_failed(self, inventory_model: InventoryEventModel, order_id, customer_email, merchant_email):

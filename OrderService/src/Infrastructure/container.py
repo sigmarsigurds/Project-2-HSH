@@ -1,5 +1,9 @@
 from dependency_injector import containers, providers
 from APIModels.service_model import ServiceModel
+from Validations.ProductBelongsToMerchantValidation import (
+    ProductBelongsToMerchantValidation,
+)
+from Validations.ProductInStockValidation import ProductInStockValidation
 from Validations.ProductExistsValidation import ProductExistsValidation
 from Validations.MerchantAllowsDiscountValidation import (
     MerchantAllowsDiscountValidation,
@@ -74,4 +78,33 @@ class Container(containers.DeclarativeContainer):
         ProductExistsValidation, __inventory_service
     )
 
+    product_in_stock_validation_provider = providers.Singleton(
+        ProductInStockValidation, __inventory_service
+    )
+
+    product_belongs_to_merchant_validation_provider = providers.Singleton(
+        ProductBelongsToMerchantValidation, __inventory_service
+    )
+
     order_validator_provider = providers.Singleton(OrderValidator)
+
+    inventory_service_provider = providers.Factory(
+        ServiceModel,
+        host=config.inventory_service_host,
+        port=config.inventory_service_port,
+        endpoint=config.inventory_service_endpoint,
+    )
+
+    merchant_service_provider = providers.Factory(
+        ServiceModel,
+        host=config.merchant_service_host,
+        port=config.merchant_service_port,
+        endpoint=config.merchant_service_endpoint,
+    )
+
+    buyer_service_provider = providers.Factory(
+        ServiceModel,
+        host=config.buyer_service_host,
+        port=config.buyer_service_port,
+        endpoint=config.buyer_service_endpoint,
+    )

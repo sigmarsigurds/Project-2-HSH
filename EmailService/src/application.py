@@ -1,35 +1,35 @@
 import pika, sys, os
 import time
 from retry import retry
+import json
 
-from emaill import EmailSender
+from email_sender import SendEmail
 from email_model import EmailModel
 
 
 @retry(pika.exceptions.AMQPConnectionError, delay=5, jitter=(1, 3))
 def get_connection():
     # TODO: create rabbitmq connection
-    return pika.BlockingConnection(pika.ConnectionParameters("rabbitmq"))
+    return pika.BlockingConnection(pika.ConnectionParameters("rabbitmq", heartbeat=5))
 
 
 def create_email_model(body):
+
     return EmailModel(
-        email_to=body.email_to,
-        subject=body.subject,
-        content=body.content,
+        emailTo=body.get("email_to"),
+        subject=body.get("subject"),
+        content=body.get("content"),
     )
 
 
 user = "honnunproject@gmail.com"
 password = "charliesheen14"
 
-email_sender = EmailSender(user, password)
+email_sender = SendEmail(user, password)
 
 
 def main():
-    print("getting connection")
     connection = get_connection()
-    print("got connection")
     channel = connection.channel()
 
     channel.exchange_declare(
@@ -47,7 +47,7 @@ def main():
     def callback(ch, method, properties, body):
         print(" [x] Received %r" % body.decode())
         body = body.decode()  # Body hefur "email_to": "", "subject": "", "content": ""
-        email = create_email_model(body)
+        email = create_email_model(json.loads(body))
         email_sender.send_email(email)
         print(" [x] Done")
         ch.basic_ack(delivery_tag=method.delivery_tag)
