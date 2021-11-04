@@ -112,13 +112,13 @@ class InventoryRepository:
         current_product_quantity -= quantity_to_free
 
         query_reserved = f"UPDATE Product SET reserved = {current_reserved_quantity} WHERE id = {product_id} RETURNING *"
-        query_product = f"UPDATE Product SET reserved = {current_product_quantity} WHERE id = {product_id} RETURNING *"
+        query_product = f"UPDATE Product SET quantity = {current_product_quantity} WHERE id = {product_id} RETURNING *"
 
         data = self.__db_connection.execute(query_reserved)
         data = self.__db_connection.execute(query_product)
 
         self.__db_connection.commit()
-
+        product = self.get_product(product_id=product_id)
         if len(data) > 0:
             product = self.__create_product_from_tuple(data[0])
 
@@ -131,11 +131,11 @@ class InventoryRepository:
         current_product_quantity = product.quantity
         current_product_quantity -= quantity_to_free
 
-        query = f"UPDATE Product SET reserved = {current_product_quantity} WHERE id = {product_id} RETURNING *"
+        query = f"UPDATE Product SET quantity = {current_product_quantity} WHERE id = {product_id} RETURNING *"
         data = self.__db_connection.execute(query)
 
         self.__db_connection.commit()
-
+        product = self.get_product(product_id=product_id)
         if len(data) > 0:
             product = self.__create_product_from_tuple(data[0])
 

@@ -144,7 +144,8 @@ async def reserves_product(
     return product
 
 
-@router.patch("/products/{product_id}/sell", status_code=200)
+# ! DELETE THIS
+@router.post("/products/{product_id}/sell", status_code=200)
 @inject
 async def sells_product(
     product_id: int,
@@ -169,6 +170,39 @@ async def sells_product(
 
     quantity = request_body.quantity
 
-    inventory_repository.sell_product(
-        product_id=product_id, quantity_to_reserve=quantity
+    product = inventory_repository.sell_product(
+        product_id=product_id, quantity_to_free=quantity
     )
+    return product
+
+
+# ! DELETE THIS
+@router.post("/products/{product_id}/free_reserved", status_code=200)
+@inject
+async def free_reserved_product(
+    product_id: int,
+    request_body: ApiReserveProductModel,
+    inventory_repository: InventoryRepository = Depends(
+        Provide[Container.inventory_repository_provider]
+    ),
+):
+
+    """
+    This endpoint receives this request body:
+        {
+            "quantity": int: (quantity to reserve)
+        }
+
+    The responds data if the request is successful:
+        {
+            "id": int (Product id),
+        }
+
+    """
+
+    quantity = request_body.quantity
+
+    product = inventory_repository.free_reserved_product(
+        product_id=product_id, quantity_to_free=quantity
+    )
+    return product
