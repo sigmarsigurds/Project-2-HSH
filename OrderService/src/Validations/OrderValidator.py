@@ -14,5 +14,9 @@ class OrderValidator(Validation):
     def add_validation(self, validation: Validation) -> None:
         self.__validations.append(validation)
 
+    def add_validations(self, validations: List[Validation]):
+        for validation in validations:
+            self.add_validation(validation)
+
     def clear_validations(self):
         self.__validations: List[Validation] = []

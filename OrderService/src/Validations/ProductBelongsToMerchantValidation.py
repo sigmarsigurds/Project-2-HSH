@@ -2,34 +2,28 @@ from typing import Optional
 from fastapi import HTTPException
 import requests
 from APIModels.service_model import ServiceModel
+from APIGateway.InventoryGateway import InventoryGateway
 from Validations.Validation import Validation
 
 
 class ProductBelongsToMerchantValidation(Validation):
-    def __init__(self, service: ServiceModel) -> None:
-        self.__request_url: str = (
-            f"http://{service.host}:{service.port}/{service.endpoint}/"
-        )
+    def __init__(self, gateway: InventoryGateway) -> None:
+        self.__gateway = gateway
         self.__product_id: int = None
         self.__merchant_id: int = None
         self.__fail_message: str = "Product does not belong to merchant"
 
     def validate(self) -> bool:
 
-        # Get a response from the InventoryService API
-        response = requests.get(f"{self.__request_url}{self.__product_id}")
-
         # If we didn't get a valid response, that's just akward
-        if response.status_code != 200:
+        if not self.__gateway.exists(self.__product_id):
             raise HTTPException(
-                status_code=418,
-                detail="Something went wrong when connecting to the InventoryService API",
+                status_code=404,
+                detail="Product does not exist",
             )
 
-        product_merchant_id = response.json().get("merchantId", None)
-
         # If the merchant id does not match the specified merchant id for the product, throw error
-        if not product_merchant_id == self.__merchant_id:
+        if not self.__gateway.get_merchant_id(self.__product_id) == self.__merchant_id:
             raise HTTPException(status_code=400, detail=self.__fail_message)
 
         # If all checks are valid, validate the discount
