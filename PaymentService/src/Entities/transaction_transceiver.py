@@ -1,7 +1,6 @@
 import json
 
 import pika, sys, os
-import time
 from retry import retry
 
 from src.Models import (
