@@ -143,7 +143,7 @@ class TransactionTransceiver:
     def __send_email(self, email_model: EmailEventModel):
         self.__channel.basic_publish(
             exchange="payment-processed",
-            routing_key="send-email-queue",
+            routing_key="send-email",
             body=email_model.json(),
         )
         print(f" [x] Sent to EmailService, {email_model.email_to}")
