@@ -18,7 +18,7 @@ class OrderRepository:
         total_price = (
             float(product.price)
             if order.discount is None or order.discount == 0
-            else float(product.price) * float(order.discount)
+            else float(product.price) * float(1 - order.discount)
         )
         rows = self.__connection.execute(
             f"""
