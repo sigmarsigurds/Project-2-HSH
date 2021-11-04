@@ -87,7 +87,7 @@ async def save_order(
     ),
     buyer_service: ServiceModel = Depends(Provide[Container.buyer_service_provider]),
 ):
-    # * Done (except for some validations)
+    # * Done
     """
     When OrderService gets the request to create an order,
     it communicates with MerchantService and BuyerService with Request/Response based communication
@@ -109,36 +109,41 @@ async def save_order(
 
     # Check if merchant exists
     merchant_exists_validation.set_merchant_id(order_request.merchant_id)
-    order_validator.add_validation(merchant_exists_validation)
 
     # Check if buyer exists
     buyer_exists_validation.set_buyer_id(order_request.buyer_id)
-    order_validator.add_validation(buyer_exists_validation)
 
     # Check if discount is valid and allowed
     merchant_allows_discount_validation.set_merchant_id(order_request.merchant_id)
     merchant_allows_discount_validation.set_order_discount(order_request.discount)
-    order_validator.add_validation(merchant_allows_discount_validation)
 
     # Check if product exists
     product_exists_validation.set_product_id(order_request.product_id)
-    order_validator.add_validation(product_exists_validation)
 
     # Check if product is in stock
     product_in_stock_validation.set_product_id(order_request.product_id)
-    order_validator.add_validation(product_in_stock_validation)
 
     # Check if product belongs to merchant
     product_belongs_to_merchant_validation.set_product_id(order_request.product_id)
     product_belongs_to_merchant_validation.set_merchant_id(order_request.merchant_id)
-    order_validator.add_validation(product_belongs_to_merchant_validation)
+
+    order_validator.add_validations(
+        [
+            merchant_exists_validation,
+            buyer_exists_validation,
+            merchant_allows_discount_validation,
+            product_exists_validation,
+            product_in_stock_validation,
+            product_belongs_to_merchant_validation,
+        ]
+    )
 
     # TODO: Look into background_tasks for something like this (https://youtu.be/ESVwKQLldjg?t=1065)
     # Execute all checks above and raise errors if anything is invalid
     order_validator.validate()
 
     """
-    * Not done
+    * Done
     Then OrderService communicates next with the InventoryService with request/response based communication 
     and reserves a product with product_id. 
     """

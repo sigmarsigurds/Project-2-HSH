@@ -23,7 +23,15 @@ class OrderSender:
     def send_order_email(self, order_email_information: OrderEmailInformationModel):
 
         subject = "Order has been created"
-        content = f"Order: {order_email_information.order_id}\nProduct: {order_email_information.product_name}\nPrice: {order_email_information.order_price}"
+        content = f"""
+        <h1 style='text-align: center;margin-bottom: .3rem;font-stretch: expanded'>Order has been created</h1>
+        <h2 style='text-align: center;font-style: italic;font-weight: normal'>Order: {order_email_information.order_id}</h2>
+        <ul style='margin-left: 3rem;list-style-type: none'>
+            <li style='font-size: 1.2rem'>Product: {order_email_information.product_name}</li>
+            <li style='font-size: 1.2rem'>Total Price: ${order_email_information.order_price}</li>
+        </ul>
+        """
+        # content = f"<h1>Order:</h1> {order_email_information.order_id}\nProduct: {order_email_information.product_name}\nPrice: {order_email_information.order_price}"
 
         # Send to merchant
         self.__send_email(
