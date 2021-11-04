@@ -22,6 +22,9 @@ class Settings(BaseSettings):
     postgres_user: str
     postgres_password: str
 
+    merchant_service_host: str
+    merchant_service_port: str
+
     environment: Environment
 
     class Config:
@@ -47,6 +50,12 @@ class Settings(BaseSettings):
             },
             'environment': {
                 'env': 'ENVIRONMENT'
-            }
+            },
+            "merchant_service_host": {
+                'env': 'MERCHANT_SERVICE_HOST'
+            },
+            'merchant_service_port': {
+                'env': 'MERCHANT_SERVICE_PORT'
+            },
         }
 

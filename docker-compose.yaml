@@ -114,17 +114,6 @@ services:
       - rabbitmq-network
   # / Email Service
 
-  # Email Service
-  payment-service:
-    build: ./PaymentService
-    depends_on:
-      - rabbitmq
-    volumes:
-      - ./PaymentService/src:/app
-    networks:
-      - rabbitmq-network
-  # / Email Service
-
   # Inventory Service
 
   inventory-service-api:
@@ -137,6 +126,8 @@ services:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=password
       - POSTGRES_DATABASE=inventory_db
+      - MERCHANT_SERVICE_HOST=merchant-service-api
+      - MERCHANT_SERVICE_PORT=8001
       - ENVIRONMENT=dev
 
     ports:
@@ -156,7 +147,8 @@ services:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=password
       - POSTGRES_DB=inventory_db
-
+      - RABBITMQ_SERVER_HOST=rabbitmq
+      
     volumes:
       - inventory-service-database-data:/var/lib/postgresql/data
       - ./InventoryService/MigrationScript:/docker-entrypoint-initdb.d/

@@ -25,5 +25,8 @@ class EmailConstructor:
         subject = self.EMAIL_SUBJECT[int(email_type)]
         content = self.EMAIL_CONTENT[int(email_type)](order_id)
 
-        return EmailEventModel(email_to, subject, content)
-
+        return EmailEventModel(
+            email_to=email_to,
+            subject=subject,
+            content=content
+        )

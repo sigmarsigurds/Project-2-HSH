@@ -1,7 +1,6 @@
 from pydantic import BaseModel
-from pydantic.fields import Field
 
 
 class InventoryEventModel(BaseModel):
-    product_id: int = Field(..., alias="productId")
+    product_id: int
     quantity: int = 1
