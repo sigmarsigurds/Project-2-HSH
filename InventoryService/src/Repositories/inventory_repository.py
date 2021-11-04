@@ -100,7 +100,8 @@ class InventoryRepository:
 
             return product
 
-    def free_reserved_product(self, product_id: int, quantity_to_free: int):
+
+    def sell_product(self, product_id: int, quantity_to_free: int):
         # TODO: free reserved product
         # product quantity- quantity to free
         # product reserved quantity - quantity to free
@@ -114,28 +115,28 @@ class InventoryRepository:
         query_reserved = f"UPDATE Product SET reserved = {current_reserved_quantity} WHERE id = {product_id} RETURNING *"
         query_product = f"UPDATE Product SET quantity = {current_product_quantity} WHERE id = {product_id} RETURNING *"
 
-        data = self.__db_connection.execute(query_reserved)
+        self.__db_connection.execute(query_reserved)
         data = self.__db_connection.execute(query_product)
 
         self.__db_connection.commit()
-        product = self.get_product(product_id=product_id)
+
         if len(data) > 0:
             product = self.__create_product_from_tuple(data[0])
 
             return product
 
-    def sell_product(self, product_id: int, quantity_to_free):
+    def free_reserved_product(self, product_id: int, quantity_to_free):
         # product quantity- quantity to free
 
         product = self.get_product(product_id=product_id)
-        current_product_quantity = product.quantity
-        current_product_quantity -= quantity_to_free
+        current_product_reserved = product.reserved
+        current_product_reserved -= quantity_to_free
 
-        query = f"UPDATE Product SET quantity = {current_product_quantity} WHERE id = {product_id} RETURNING *"
+        query = f"UPDATE Product SET reserved = {current_product_reserved} WHERE id = {product_id} RETURNING *"
         data = self.__db_connection.execute(query)
 
         self.__db_connection.commit()
-        product = self.get_product(product_id=product_id)
+
         if len(data) > 0:
             product = self.__create_product_from_tuple(data[0])
 

@@ -88,9 +88,10 @@ class PaymentQueueReceiving:
 
         print(inventory_event_model)
 
-        # self.__inventory_repository.reserve_product()
-
-
+        self.__inventory_repository.free_reserved_product(
+            inventory_event_model.product_id,
+            inventory_event_model.quantity
+        )
 
         self.__event_finished(ch, method)  # This could be done with decorator
 
@@ -103,7 +104,10 @@ class PaymentQueueReceiving:
 
         inventory_event_model = self.__create_inventory_event_model(body)
 
-        print(inventory_event_model)
+        self.__inventory_repository.sell_product(
+            inventory_event_model.product_id,
+            inventory_event_model.quantity
+        )
 
         self.__event_finished(ch, method)  # This could be done with decorator
 
