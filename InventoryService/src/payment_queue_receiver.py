@@ -1,13 +1,18 @@
+import json
+
 import pika, sys, os
 import time
 from retry import retry
 
+from src.Models import InventoryEventModel
+from src.Repositories import InventoryRepository
 
 
 class PaymentQueueReceiving:
-    def __init__(self, rabbitmq_server_host: str):
+    def __init__(self, rabbitmq_server_host: str, inventory_repository: InventoryRepository):
         self.__connection = self.__get_connection(rabbitmq_server_host)
         self.__channel = self.__connection.channel()
+        self.__inventory_repository = inventory_repository
 
         self.__channel.exchange_declare(
             exchange="payment-processed", exchange_type="direct", durable=True
@@ -61,19 +66,48 @@ class PaymentQueueReceiving:
         ch.basic_ack(delivery_tag=method.delivery_tag)
 
 
+    @staticmethod
+    def __create_inventory_event_model(body: dict):
+        return InventoryEventModel(
+            product_id=body.get("product_id"),
+            quantity=body.get("quantity")
+        )
+
+
+    @staticmethod
+    def __parse_body(body):
+        body = body.decode()
+        return json.loads(body)
+
     def __on_payment_failed(self, ch, method, properties, body):
         print("Payment failed")
-        print(body.decode())
 
+        body = self.__parse_body(body)
+
+        inventory_event_model = self.__create_inventory_event_model(body)
+
+        print(inventory_event_model)
+
+        self.__inventory_repository.free_reserved_product(
+            inventory_event_model.product_id,
+            inventory_event_model.quantity
+        )
 
         self.__event_finished(ch, method)  # This could be done with decorator
-
 
 
     def __on_payment_succeeded(self, ch, method, properties, body):
         print("Payment succeeded")
         print(body.decode())
 
+        body = self.__parse_body(body)
+
+        inventory_event_model = self.__create_inventory_event_model(body)
+
+        self.__inventory_repository.sell_product(
+            inventory_event_model.product_id,
+            inventory_event_model.quantity
+        )
 
         self.__event_finished(ch, method)  # This could be done with decorator
 
