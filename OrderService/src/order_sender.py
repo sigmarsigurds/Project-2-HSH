@@ -44,7 +44,7 @@ class OrderSender:
     ):
         self.channel.basic_publish(
             exchange="order-created",
-            routing_key="order-created-payment-queue",
+            routing_key="order-created-payment",
             body=order_payment_information.json(),
             properties=pika.BasicProperties(delivery_mode=2),
         )

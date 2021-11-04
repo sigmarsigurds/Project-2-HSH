@@ -1,8 +1,9 @@
 from typing import Optional
 from dependency_injector.wiring import inject, Provide
 from fastapi import APIRouter, Depends, HTTPException
+import requests
 
-from src.Models import ProductModel, ApiReserveProductModel
+from src.Models import ProductModel, ApiReserveProductModel, ServiceModel
 from src.Infrastructure.container import Container
 from src.Repositories import (
     InventoryRepository,
@@ -64,6 +65,7 @@ async def save_product(
     inventory_repository: InventoryRepository = Depends(
         Provide[Container.inventory_repository_provider]
     ),
+    merchant_service: ServiceModel = Depends(Provide[Container.merchant_service_model])
 ):
     """
     This endpoint is used to create product
@@ -87,6 +89,20 @@ async def save_product(
     :param product: The request body
     :param inventory_repository: Dont modify this
     """
+
+    # TODO: Get merchant path from docker-compose
+
+    # * Check if merchants exists
+    merchant_id = product.merchant_id
+
+    url = merchant_service.get_url(f"/merchants/{merchant_id}")
+
+    respond = requests.get(url)
+
+    if respond.status_code == 404:
+        raise HTTPException(status_code=404, detail=f"No merchant with id {merchant_id}")
+
+
     new_product = inventory_repository.save_product(product)
 
     return new_product.id
@@ -99,7 +115,7 @@ async def reserves_product(
     request_body: ApiReserveProductModel,
     inventory_repository: InventoryRepository = Depends(
         Provide[Container.inventory_repository_provider]
-    ),
+    )
 ):
 
     """

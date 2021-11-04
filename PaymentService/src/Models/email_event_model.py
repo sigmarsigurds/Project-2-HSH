@@ -3,6 +3,6 @@ from pydantic.fields import Field
 
 
 class EmailEventModel(BaseModel):
-    email_to: str = Field(..., alias="emailTo")
+    email_to: str
     subject: str
     content: str

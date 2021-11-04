@@ -26,7 +26,7 @@ class TransactionRepository:
 
 
     def save_transaction(self, transaction: TransactionModel) -> TransactionModel:
-        values = f"(DEFAULT, '{transaction.order_id}', '{transaction.success}'"
+        values = f"(DEFAULT, '{transaction.order_id}', '{transaction.success}')"
 
         query = f"INSERT INTO Payment_Transaction VALUES {values} RETURNING *"
 

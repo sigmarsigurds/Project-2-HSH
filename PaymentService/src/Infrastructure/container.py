@@ -25,13 +25,15 @@ class Container(containers.DeclarativeContainer):
 
     __transaction_repository_provider = providers.Singleton(TransactionRepository, db_connection=__db_connection)
 
-    __email_constructor_provider = providers.Singleton(EmailConstructor, db_connection=__db_connection)
+    __email_constructor_provider = providers.Singleton(EmailConstructor)
 
     __transaction_provider = providers.Singleton(
         Transaction,
         credit_card_validator=__credit_card_validator,
         transaction_repository=__transaction_repository_provider
     )
+
+    print(f"Rabbitmq {config.rabbitmq_server_host}")
 
     transaction_transceiver_provider = providers.Singleton(
         TransactionTransceiver,

@@ -5,10 +5,10 @@ from src.Models.credit_card_model import CreditCardModel
 
 
 class OrderPaymentInformationModel(BaseModel):
-    order_id: int = Field(..., alias="orderId")
-    buyer_email: str = Field(..., alias="buyerEmail")
-    merchant_email: str = Field(..., alias="merchantEmail")
-    product_id: int = Field(..., alias="productId")
-    merchant_id: int = Field(..., alias="merchantId")
-    credit_card: CreditCardModel = Field(..., alias="creditCard")
+    order_id: int
+    buyer_email: str
+    merchant_email: str
+    product_id: int
+    merchant_id: int
+    credit_card: CreditCardModel
     quantity: int = 1
