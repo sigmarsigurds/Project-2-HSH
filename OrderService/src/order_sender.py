@@ -4,6 +4,7 @@ from retry import retry
 from APIModels.order_database_model import OrderDatabaseModel
 from APIModels.order_email_information_model import OrderEmailInformationModel
 from APIModels.order_payment_information_model import OrderPaymentInformationModel
+from APIModels.email_model import EmailModel
 
 
 class OrderSender:
@@ -20,29 +21,47 @@ class OrderSender:
         # self.channel.queue_declare(queue="order_created_email_queue", durable=True)
 
     def send_order_email(self, order_email_information: OrderEmailInformationModel):
-        # TODO: send message via rabbitmq
 
-        self.channel.basic_publish(
-            exchange="order-created",
-            routing_key="   ",
-            body=order_email_information.json(),
-            properties=pika.BasicProperties(delivery_mode=2),
+        subject = "Order has been created"
+        content = f"Order: {order_email_information.order_id}\nProduct: {order_email_information.product_name}\nPrice: {order_email_information.order_price}"
+
+        # Send to merchant
+        self.__send_email(
+            recepient=order_email_information.merchant_email,
+            subject=subject,
+            content=content,
         )
 
-        print(f" [x] Sent to EmailService the new order '{order_email_information}'")
+        # Send to buyer
+        self.__send_email(
+            recepient=order_email_information.buyer_email,
+            subject=subject,
+            content=content,
+        )
 
     def send_order_payment(
         self, order_payment_information: OrderPaymentInformationModel
     ):
         self.channel.basic_publish(
             exchange="order-created",
-            routing_key="order_created_payment_queue",
+            routing_key="order-created-payment-queue",
             body=order_payment_information.json(),
             properties=pika.BasicProperties(delivery_mode=2),
         )
         print(
             f" [x] Sent to PaymentService the new order '{order_payment_information}'"
         )
+
+    def __send_email(self, recepient: str, subject: str, content: str):
+        # Send to merchant
+        self.channel.basic_publish(
+            exchange="order-created",
+            routing_key="send-email",
+            body=EmailModel(emailTo=recepient, subject=subject, content=content).json(),
+            properties=pika.BasicProperties(delivery_mode=2),
+        )
+
+        print(f" [x] Sent to EmailService ({recepient}) the new order")
 
     @retry(pika.exceptions.AMQPConnectionError, delay=5, jitter=(1, 3))
     def __get_connection(self):

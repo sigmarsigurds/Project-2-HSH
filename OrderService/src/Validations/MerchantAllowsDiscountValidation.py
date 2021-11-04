@@ -30,10 +30,7 @@ class MerchantAllowsDiscountValidation(Validation):
                 detail="Something went wrong when connecting to the MerchantService API",
             )
 
-        data = response.json().get("data", None)
-        # * Just assuming that i will get data from merchant api :shrug-emoji
-
-        allows_discount = data.get("allowsDiscount", False)
+        allows_discount = response.json().get("allowsDiscount", False)
 
         # If the order has a discount on it and the merchant does not allow discounts, send error
         if not allows_discount:

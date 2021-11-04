@@ -28,12 +28,11 @@ class BuyerRepository:
         )
         if len(rows) > 0:
             row = rows[0]
-            return {
-                "buyer": BuyerModel(
-                    buyerId=id,
-                    name=row[1],
-                    ssn=row[2],
-                    email=row[3],
-                    phoneNumber=row[4],
-                )  # skila nafni
-            }
+            return BuyerModel(
+                buyerId=id,
+                name=row[1],
+                ssn=row[2],
+                email=row[3],
+                phoneNumber=row[4],
+                # skila nafni
+            )

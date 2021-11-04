@@ -8,11 +8,14 @@ from src.Repositories import MerchantRepository
 router = APIRouter()
 
 
-@router.get('/merchants/{merchant_id}', status_code=200)
+@router.get("/merchants/{merchant_id}", status_code=200)
 @inject
 async def get_merchants(
-        merchant_id: int,
-        merchant_repository: MerchantRepository = Depends(Provide[Container.merchant_repository_provider])):
+    merchant_id: int,
+    merchant_repository: MerchantRepository = Depends(
+        Provide[Container.merchant_repository_provider]
+    ),
+):
 
     # TODO: Remove the data wrapper from the respond
 
@@ -21,25 +24,24 @@ async def get_merchants(
     if merchant is None:
         raise HTTPException(status_code=404, detail="Item not found")
 
-    return {"data": merchant}
+    return merchant
 
 
-@router.post('/merchants', status_code=201)
+@router.post("/merchants", status_code=201)
 @inject
 async def save_merchants(
-        merchant: MerchantModel,
-        merchant_repository: MerchantRepository = Depends(
-            Provide[Container.merchant_repository_provider])):
+    merchant: MerchantModel,
+    merchant_repository: MerchantRepository = Depends(
+        Provide[Container.merchant_repository_provider]
+    ),
+):
 
     # TODO: Remove the data wrapper from the respond
     # TODO: Create method should only return id
 
     merchant = merchant_repository.save_merchant(merchant)
 
-    return {"data": merchant}
+    return merchant
 
 
 # TODO: Crate enpoint merchants/{id}/allows_discount
-
-
-

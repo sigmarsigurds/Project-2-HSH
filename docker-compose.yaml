@@ -133,7 +133,7 @@ services:
     environment:
       - HOST=0.0.0.0
       - PORT=8003
-      - POSTGRES_HOST=inventory-service-database
+      - POSTGRES_HOST=inventory-service-db
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=password
       - POSTGRES_DATABASE=inventory_db
@@ -145,6 +145,9 @@ services:
       - ./InventoryService/src:/app/src
     depends_on:
       - inventory-service-db
+    networks:
+      - rabbitmq-network
+      - inventory-network
 
   inventory-service-db:
     container_name: "Inventory-Service-database"
@@ -157,6 +160,8 @@ services:
     volumes:
       - inventory-service-database-data:/var/lib/postgresql/data
       - ./InventoryService/MigrationScript:/docker-entrypoint-initdb.d/
+    networks:
+      - inventory-network
 
   # / Inventory Service
 
@@ -217,6 +222,9 @@ networks:
     driver: bridge
 
   merchant-network:
+    driver: bridge
+
+  inventory-network:
     driver: bridge
 
   rabbitmq-network:

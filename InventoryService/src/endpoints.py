@@ -4,18 +4,24 @@ from fastapi import APIRouter, Depends, HTTPException
 
 from src.Models import ProductModel, ApiReserveProductModel
 from src.Infrastructure.container import Container
-from src.Repositories import InventoryRepository, ProductQuantityCanNotBeNegative, ProductDoesNotExist
+from src.Repositories import (
+    InventoryRepository,
+    ProductQuantityCanNotBeNegative,
+    ProductDoesNotExist,
+)
 
 router = APIRouter()
 
 
-@router.get('/products/{product_id}', status_code=200)
+@router.get("/products/{product_id}", status_code=200)
 @inject
 async def get_product(
-        product_id: int,
-        merchant_id: Optional[int] = None,
-        inventory_repository: InventoryRepository = Depends(
-            Provide[Container.inventory_repository_provider])):
+    product_id: int,
+    merchant_id: Optional[int] = None,
+    inventory_repository: InventoryRepository = Depends(
+        Provide[Container.inventory_repository_provider]
+    ),
+):
 
     """
     This endpoint does not use request body.
@@ -40,21 +46,25 @@ async def get_product(
     :param inventory_repository: Dont modify this
     """
     try:
-        product = inventory_repository.get_product(product_id=product_id, merchant_id=merchant_id)
+        product = inventory_repository.get_product(
+            product_id=product_id, merchant_id=merchant_id
+        )
 
     except ProductDoesNotExist:
-        return HTTPException(status_code=404, detail="Item not found")
+        raise HTTPException(status_code=404, detail="Item not found")
 
     del product.id  # Remove the product id from the respond data
     return product
 
 
-@router.post('/products', status_code=201)
+@router.post("/products", status_code=201)
 @inject
 async def save_product(
-        product: ProductModel,
-        inventory_repository: InventoryRepository = Depends(
-            Provide[Container.inventory_repository_provider])):
+    product: ProductModel,
+    inventory_repository: InventoryRepository = Depends(
+        Provide[Container.inventory_repository_provider]
+    ),
+):
     """
     This endpoint is used to create product
 
@@ -82,13 +92,15 @@ async def save_product(
     return new_product.id
 
 
-@router.patch('/products/{product_id}/reserve', status_code=200)
+@router.patch("/products/{product_id}/reserve", status_code=200)
 @inject
 async def reserves_product(
-        product_id: int,
-        request_body: ApiReserveProductModel,
-        inventory_repository: InventoryRepository = Depends(
-            Provide[Container.inventory_repository_provider])):
+    product_id: int,
+    request_body: ApiReserveProductModel,
+    inventory_repository: InventoryRepository = Depends(
+        Provide[Container.inventory_repository_provider]
+    ),
+):
 
     """
     This endpoint receives this request body:
@@ -118,7 +130,9 @@ async def reserves_product(
     quantity = request_body.quantity
 
     try:
-        product = inventory_repository.reserve_product(product_id=product_id, quantity_to_reserve=quantity)
+        product = inventory_repository.reserve_product(
+            product_id=product_id, quantity_to_reserve=quantity
+        )
 
     except ProductDoesNotExist:
         return HTTPException(status_code=404, detail="Product not found")
@@ -130,5 +144,65 @@ async def reserves_product(
     return product
 
 
+# ! DELETE THIS
+@router.post("/products/{product_id}/sell", status_code=200)
+@inject
+async def sells_product(
+    product_id: int,
+    request_body: ApiReserveProductModel,
+    inventory_repository: InventoryRepository = Depends(
+        Provide[Container.inventory_repository_provider]
+    ),
+):
+
+    """
+    This endpoint receives this request body:
+        {
+            "quantity": int: (quantity to reserve)
+        }
+
+    The responds data if the request is successful:
+        {
+            "id": int (Product id),
+        }
+
+    """
+
+    quantity = request_body.quantity
+
+    product = inventory_repository.sell_product(
+        product_id=product_id, quantity_to_free=quantity
+    )
+    return product
 
 
+# ! DELETE THIS
+@router.post("/products/{product_id}/free_reserved", status_code=200)
+@inject
+async def free_reserved_product(
+    product_id: int,
+    request_body: ApiReserveProductModel,
+    inventory_repository: InventoryRepository = Depends(
+        Provide[Container.inventory_repository_provider]
+    ),
+):
+
+    """
+    This endpoint receives this request body:
+        {
+            "quantity": int: (quantity to reserve)
+        }
+
+    The responds data if the request is successful:
+        {
+            "id": int (Product id),
+        }
+
+    """
+
+    quantity = request_body.quantity
+
+    product = inventory_repository.free_reserved_product(
+        product_id=product_id, quantity_to_free=quantity
+    )
+    return product
