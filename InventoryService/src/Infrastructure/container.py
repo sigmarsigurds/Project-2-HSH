@@ -24,9 +24,11 @@ class Container(containers.DeclarativeContainer):
         port=config.merchant_service_port
     )
 
-    payment_queue_receiver_provider = providers.Singleton(PaymentQueueReceiving,
-                                                          rabbitmq_server_host=config.rabbitmq_server_host)
-
     __db_connection = providers.Singleton(PostgresDbConnection, __db_config)
 
     inventory_repository_provider = providers.Singleton(InventoryRepository, db_connection=__db_connection)
+
+    payment_queue_receiver_provider = providers.Singleton(PaymentQueueReceiving,
+                                                          rabbitmq_server_host=config.rabbitmq_server_host,
+                                                          inventory_repository=inventory_repository_provider
+    )
