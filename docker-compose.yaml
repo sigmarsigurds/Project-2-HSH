@@ -6,11 +6,12 @@ services:
     container_name: "order-service"
     depends_on:
       - order-database-host
-      - merchant-service-api
-      - buyer
-      - inventory-service-api
+      - Merchant-Service-api
+      - buyer_container
+      - Inventory-Service-api
       - rabbitmq
       - email-service
+      - Payment-Service-api
     volumes:
       - ./OrderService/src:/app
     networks:
@@ -85,7 +86,7 @@ services:
 
   buyer_db:
     image: postgres
-    container_name: buyer_db
+    container_name: "buyer_db"
     environment:
       - POSTGRES_USER=${BUYER_SERVICE_POSTGRES_USER}
       - POSTGRES_PASSWORD=${BUYER_SERVICE_POSTGRES_PASSWORD}
@@ -143,7 +144,7 @@ services:
       - POSTGRES_PASSWORD=${INVENTORY_SERVICE_POSTGRES_PASSWORD}
       - POSTGRES_DB=${INVENTORY_SERVICE_POSTGRES_DATABASE}
       - RABBITMQ_SERVER_HOST=${RABBITMQ_SERVER_HOST}
-      
+
     volumes:
       - inventory-service-database-data:/var/lib/postgresql/data
       - ./InventoryService/MigrationScript:/docker-entrypoint-initdb.d/
@@ -221,7 +222,6 @@ services:
       - order-network
       - buyer-network
       - merchant-network
-
 
 volumes:
   order-database-data:
