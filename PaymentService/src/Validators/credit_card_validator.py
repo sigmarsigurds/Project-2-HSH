@@ -26,9 +26,7 @@ class CreditCardValidator:
             return checksum % 10
 
         if not luhn_checksum(card_number) == 0:
-            print("Card validation failed")
             raise InvalidCreditCard()
-        print("Card validation succeeded")
 
         # print('Valid') if luhn_checksum("4532015112830366")==0 else print('Invalid')
 

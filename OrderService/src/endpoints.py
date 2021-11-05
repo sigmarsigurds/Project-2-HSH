@@ -82,13 +82,6 @@ async def save_order(
     product_belongs_to_merchant_validation: ProductBelongsToMerchantValidation = Depends(
         Provide[Container.product_belongs_to_merchant_validation_provider]
     ),
-    inventory_service: ServiceModel = Depends(
-        Provide[Container.inventory_service_provider]
-    ),
-    merchant_service: ServiceModel = Depends(
-        Provide[Container.merchant_service_provider]
-    ),
-    buyer_service: ServiceModel = Depends(Provide[Container.buyer_service_provider]),
     inventory_gateway: InventoryGateway = Depends(
         Provide[Container.inventory_gateway_provider]
     ),

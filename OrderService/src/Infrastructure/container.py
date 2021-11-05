@@ -41,7 +41,6 @@ class Container(containers.DeclarativeContainer):
 
     order_sender_provider = providers.Singleton(
         OrderSender,
-        # queue_name=config.queue_name,
         rabbitmq_server_host=config.rabbitmq_server_host,
     )
 
@@ -99,24 +98,3 @@ class Container(containers.DeclarativeContainer):
     )
 
     order_validator_provider = providers.Singleton(OrderValidator)
-
-    inventory_service_provider = providers.Factory(
-        ServiceModel,
-        host=config.inventory_service_host,
-        port=config.inventory_service_port,
-        endpoint=config.inventory_service_endpoint,
-    )
-
-    merchant_service_provider = providers.Factory(
-        ServiceModel,
-        host=config.merchant_service_host,
-        port=config.merchant_service_port,
-        endpoint=config.merchant_service_endpoint,
-    )
-
-    buyer_service_provider = providers.Factory(
-        ServiceModel,
-        host=config.buyer_service_host,
-        port=config.buyer_service_port,
-        endpoint=config.buyer_service_endpoint,
-    )
