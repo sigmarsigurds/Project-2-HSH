@@ -33,8 +33,6 @@ class Container(containers.DeclarativeContainer):
         transaction_repository=__transaction_repository_provider
     )
 
-    print(f"Rabbitmq {config.rabbitmq_server_host}")
-
     transaction_transceiver_provider = providers.Singleton(
         TransactionTransceiver,
         transaction=__transaction_provider,

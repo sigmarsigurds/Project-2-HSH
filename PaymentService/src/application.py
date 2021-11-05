@@ -1,7 +1,6 @@
 from src.Infrastructure import Settings, Container
 import src.Entities.transaction_transceiver as transceiver_file
 
-print("Ég er til")
 
 def main():
 

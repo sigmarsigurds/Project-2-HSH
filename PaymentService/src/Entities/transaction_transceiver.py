@@ -66,8 +66,6 @@ class TransactionTransceiver:
     def __create_order_payment_information_model(body: dict):
         credit_card_dict = body.get("credit_card", {})
 
-        print(credit_card_dict)
-
         credit_card = CreditCardModel(
             card_number=credit_card_dict.get("card_number"),
             expiration_month=credit_card_dict.get("expiration_month"),

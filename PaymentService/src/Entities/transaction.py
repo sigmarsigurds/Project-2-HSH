@@ -27,6 +27,5 @@ class Transaction:
 
         # * Transaction successful
         transaction.success = True
+
         self.transaction_repository.save_transaction(transaction)
-
-
