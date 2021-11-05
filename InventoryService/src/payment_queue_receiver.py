@@ -86,7 +86,6 @@ class PaymentQueueReceiving:
 
         inventory_event_model = self.__create_inventory_event_model(body)
 
-        print(inventory_event_model)
 
         self.__inventory_repository.free_reserved_product(
             inventory_event_model.product_id,
@@ -98,7 +97,6 @@ class PaymentQueueReceiving:
 
     def __on_payment_succeeded(self, ch, method, properties, body):
         print("Payment succeeded")
-        print(body.decode())
 
         body = self.__parse_body(body)
 

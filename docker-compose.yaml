@@ -4,14 +4,15 @@ services:
   order-service:
     build: ./OrderService
     container_name: "order-service"
+    restart: on-failure:10
     depends_on:
       - order-database-host
-      - Merchant-Service-api
+      - merchant-service-api
       - buyer_container
-      - Inventory-Service-api
+      - inventory-service-api
       - rabbitmq
       - email-service
-      - Payment-Service-api
+      - payment-service-api
     volumes:
       - ./OrderService/src:/app
     networks:
@@ -35,8 +36,9 @@ services:
 
   # Merchant Service
   merchant-service-api:
-    container_name: "Merchant-Service-api"
+    container_name: "merchant-service-api"
     build: ./MerchantService
+    restart: on-failure:10
     environment:
       - HOST=0.0.0.0
       - PORT=${MERCHANT_SERVICE_PORT}
@@ -49,13 +51,13 @@ services:
     volumes:
       - ./MerchantService/src:/app/src
     depends_on:
-      - Merchant-Service-database
+      - merchant-service-db
     networks:
       - merchant-network
       - rabbitmq-network
 
   merchant-service-db:
-    container_name: "Merchant-Service-database"
+    container_name: "merchant-service-db"
     image: postgres
     environment:
       - POSTGRES_USER=${MERCHANT_SERVICE_POSTGRES_USER}
@@ -75,7 +77,8 @@ services:
 
   buyer:
     build: ./BuyerService/src
-    container_name: "buyer_container"
+    container_name: "buyer"
+    restart: on-failure:10
     depends_on:
       - buyer_db
     volumes:
@@ -102,6 +105,7 @@ services:
   # Email Service
   email-service:
     build: ./EmailService
+    restart: on-failure:10
     depends_on:
       - rabbitmq
     volumes:
@@ -113,8 +117,9 @@ services:
   # Inventory Service
 
   inventory-service-api:
-    container_name: "Inventory-Service-api"
+    container_name: "inventory-service-api"
     build: ./InventoryService
+    restart: on-failure:10
     environment:
       - HOST=0.0.0.0
       - PORT=${INVENTORY_SERVICE_PORT}
@@ -130,14 +135,14 @@ services:
     volumes:
       - ./InventoryService/src:/app/src
     depends_on:
-      - Inventory-Service-database
+      - inventory-service-db
       - rabbitmq
     networks:
       - rabbitmq-network
       - inventory-network
 
   inventory-service-db:
-    container_name: "Inventory-Service-database"
+    container_name: "inventory-service-db"
     image: postgres
     environment:
       - POSTGRES_USER=${INVENTORY_SERVICE_POSTGRES_USER}
@@ -161,8 +166,9 @@ services:
       - rabbitmq-network
 
   payment-service-api:
-    container_name: "Payment-Service-api"
+    container_name: "payment-service-api"
     build: ./PaymentService
+    restart: on-failure:10
     environment:
       - POSTGRES_HOST=${PAYMENT_SERVICE_POSTGRES_HOST}
       - POSTGRES_USER=${PAYMENT_SERVICE_POSTGRES_USER}
@@ -173,14 +179,14 @@ services:
     volumes:
       - ./PaymentService/src:/app/src
     depends_on:
-      - Payment-Service-database
+      - payment-service-db
       - rabbitmq
     networks:
       - rabbitmq-network
       - payment-service-network
 
   payment-service-db:
-    container_name: "Payment-Service-database"
+    container_name: "payment-service-db"
     image: postgres
     environment:
       - POSTGRES_USER=${PAYMENT_SERVICE_POSTGRES_USER}
@@ -195,6 +201,7 @@ services:
   api-layer:
     container_name: "API-Layer"
     build: ./ApiLayer
+    restart: on-failure:10
     environment:
       - HOST=${API_SERVICE_HOST}
       - PORT=${API_SERVICE_PORT}
@@ -214,9 +221,9 @@ services:
       - ./ApiLayer/src:/app/src
     depends_on:
       - order-service
-      - Inventory-Service-api
-      - buyer_container
-      - Merchant-Service-api
+      - inventory-service-api
+      - buyer
+      - merchant-service-api
     networks:
       - inventory-network
       - order-network

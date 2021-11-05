@@ -33,12 +33,6 @@ def create_app() -> FastAPI:
 app = create_app()
 
 
-@app.on_event("startup")
-@inject
-async def get_message():
-    print("Ég er lika  til")
-
-
 if __name__ == '__main__':
 
 
